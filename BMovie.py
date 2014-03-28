@@ -7,6 +7,62 @@ import string
 
 #//**********************************************************************
 #//
+#//  BMovieTuple
+#//
+#//  This class extends choice( ) by allowing for tracking most-recently
+#//  selected items and making sure it doesn't choose the same item
+#//  within a certain threshold of choices.
+#//
+#//  The threshold is calculated to be half
+#//
+#//**********************************************************************
+
+class BMovieTuple( object ):
+    def __init__( self, values ):
+        global wordListCounts
+
+        if type( values ) is list:
+            self.values = [ [ item ] * repeat for item, repeat in zip( values[ : : 2 ], values[ 1 : : 2 ] ) ]
+            #print( "1 --> ", end='' )
+            #print( self.values )
+            self.values = [ item for sublist in self.values for item in sublist ]
+            #print( "2 --> ", end='' )
+            #print( self.values )
+        else:
+            self.values = values
+
+        self.mru = list( )
+
+        if len( self.values ) > 2:
+            self.maxHistory = len( self.values ) + 1
+        elif len( self.values ) == 2:
+            self.maxHistory = 1
+        else:
+            self.maxHistory = 0
+
+    def choice( self ):
+        while True:
+            result = self.values.choice( )
+
+            if result not in self.mru:
+                break
+
+        self.mru.append( result )
+
+        if len( self.mru ) > len( self.values ) / 2:
+            self.mru = self.mru[ 1 : ]
+
+        return self.values[ index ]
+
+    def __len__( self ):
+        return len( self.values )
+
+    def __getitem__( self, key ):
+        return self.values[ key ]
+
+
+#//**********************************************************************
+#//
 #//  constants
 #//
 #//**********************************************************************
@@ -70,54 +126,77 @@ namePlaceGeographyPlural                    = 97
 namePlaceTerritorySingular                  = 98
 namePlaceTerritoryPlural                    = 99
 
-nameCharacterSingularCommon                 = 110
-nameCharacterSingularProper                 = 111
-nameCharacterSingularProperSimple           = 112
-nameCharacterSingularProperSimplePossessive = 113
-nameCharacterSingularLeader                 = 114
-nameCharacterPluralLeader                   = 115
-nameCharacterPluralCommon                   = 116
-nameCharacterPluralProper                   = 117
-nameCharacterPluralProperSimple             = 118
+nameHeroSingularCommon                      = 110
+nameHeroSingularProper                      = 111
+nameHeroSingularProperSimple                = 112
+nameHeroSingularProperSimplePossessive      = 113
+nameHeroSingularLeader                      = 114
+nameHeroPluralLeader                        = 115
+nameHeroPluralCommon                        = 116
+nameHeroPluralProper                        = 117
+nameHeroPluralProperSimple                  = 118
+nameHeroPluralProperSimplePossessive        = 119
 
-nameGroupDescription                        = 130
-nameGroupTypePrepend                        = 131
-nameGroupTypeAppend                         = 132
-nameGroupPrepend                            = 133
-nameGroupAppend                             = 134
+nameVillainSingularCommon                   = 130
+nameVillainSingularProper                   = 131
+nameVillainSingularProperSimple             = 132
+nameVillainSingularProperSimplePossessive   = 133
+nameVillainSingularLeader                   = 134
+nameVillainPluralLeader                     = 135
+nameVillainPluralCommon                     = 136
+nameVillainPluralProper                     = 137
+nameVillainPluralProperSimple               = 138
+nameVillainPluralProperSimplePossessive     = 139
 
-nameConcept                                 = 140
-nameDirection                               = 141
-nameEventSingular                           = 142
-nameEventPlural                             = 143
-namePlaceModifier                           = 144
-nameEventEpoch                              = 145
-nameEventStorySingular                      = 146
-nameEventStoryPlural                        = 147
-nameVehicleSingular                         = 148
-nameVehiclePlural                           = 149
-nameWeaponSingular                          = 150
-nameWeaponPlural                            = 151
-nameTimeSingular                            = 152
-nameTimePlural                              = 153
+nameCharacterSingularProper                 = 150
+nameCharacterPluralProper                   = 151
+nameCharacterSingularProperSimplePossessive = 152
+nameCharacterPluralProperSimplePossessive   = 153
 
-nameObjectSingularCommon                    = 160
-nameObjectPluralCommon                      = 161
-nameObjectProper                            = 162
-nameObjectProperSimple                      = 163
+nameGroupDescription                        = 160
+nameGroupTypePrepend                        = 161
+nameGroupTypeAppend                         = 162
+nameGroupPrepend                            = 163
+nameGroupAppend                             = 164
 
-namePossessionSingular                      = 170
-namePossessionPlural                        = 171
+nameConcept                                 = 170
+nameDirection                               = 171
+nameEventSingular                           = 172
+nameEventPlural                             = 173
+namePlaceModifier                           = 174
+nameEventEpoch                              = 175
+nameEventStorySingular                      = 176
+nameEventStoryPlural                        = 177
+nameVehicleSingular                         = 178
+nameVehiclePlural                           = 179
+nameWeaponSingular                          = 180
+nameWeaponPlural                            = 181
+nameTimeSingular                            = 182
+nameTimePlural                              = 183
 
-prepositionalPhraseSingularCommon           = 180
-prepositionalPhraseSingularProper           = 181
-prepositionalPhrasePluralCommon             = 182
-prepositionalPhrasePluralProper             = 183
-prepositionalPhraseEvent                    = 184
+nameObjectSingularCommon                    = 190
+nameObjectPluralCommon                      = 191
+nameObjectProper                            = 192
+nameObjectProperSimple                      = 193
+
+namePossessionSingular                      = 200
+namePossessionPlural                        = 201
+
+prepositionalPhraseSingularCommon           = 210
+prepositionalPhraseSingularProper           = 211
+prepositionalPhrasePluralCommon             = 212
+prepositionalPhrasePluralProper             = 213
+prepositionalPhraseEvent                    = 214
 
 
-def makeNameCharacterSingularProperSimplePossessive( ) :
-    result = getWord( nameCharacterSingularProperSimple )
+#//**********************************************************************
+#//
+#//  makePossessive
+#//
+#//**********************************************************************
+
+def makePossessive( wordType ):
+    result = getWord( wordType )
 
     if result[ -1 ] == 's':
         return result + "'"
@@ -125,153 +204,132 @@ def makeNameCharacterSingularProperSimplePossessive( ) :
         return result + "'s"
 
 
-wordLists = {
-    adjectiveTexture : (
-        "Alabaster",
-        "Amber",
-        "Amber",
-        "Azure",
-        "Black",
-        "Black",
-        "Black",
-        "Black",
-        "Blue",
-        "Blue",
-        "Cerulean",
-        "Crimson",
-        "Crimson",
-        "Ebony",
-        "Ebony",
-        "Glistening",
-        "Glowing",
-        "Golden",
-        "Golden",
-        "Green",
-        "Green",
-        "Grey",
-        "Many-Colored",
-        "Orange",
-        "Pale",
-        "Purple",
-        "Violet",
-        "Red",
-        "Red",
-        "Red",
-        "Shining",
-        "Shiny",
-        "Silvery",
-        "Sparkling",
-        "Vermillion",
-        "White",
-        "White",
-        "White",
-        "White",
-        "Yellow",
-    ),
+def makeNameHeroSingularProperSimplePossessive( ):
+    return makePossessive( nameHeroSingularProperSimple )
 
-    adjectiveTime : (
+def makeNameHeroPluralProperSimplePossessive( ):
+    return makePossessive( nameHeroPluralProperSimple )
+
+def makeNameVillainSingularProperSimplePossessive( ):
+    return makePossessive( nameVillainSingularProperSimple )
+
+def makeNameVillainPluralProperSimplePossessive( ):
+    return makePossessive( nameVillainPluralProperSimple )
+
+
+
+wordLists = {
+
+#//**********************************************************************
+#//
+#//  adjectives
+#//
+#//**********************************************************************
+
+    adjectiveTexture : BMovieTuple( [
+        "Alabaster",    1,
+        "Amber",        2,
+        "Azure",        1,
+        "Black",        3,
+        "Blue",         2,
+        "Cerulean",     1,
+        "Crimson",      2,
+        "Ebony",        2,
+        "Glistening",   1,
+        "Glowing",      1,
+        "Golden",       2,
+        "Green",        2,
+        "Grey",         1,
+        "Many-Colored", 1,
+        "Orange",       1,
+        "Pale",         1,
+        "Purple",       1,
+        "Violet",       1,
+        "Red",          3,
+        "Shining",      1,
+        "Shiny",        1,
+        "Silvery",      1,
+        "Sparkling",    1,
+        "Vermillion",   1,
+        "White",        3,
+        "Yellow",       1,
+    ] ),
+
+    adjectiveTime : BMovieTuple( (
         "Ancient",
-        "Ancient",
-        "Epic",
-        "Epochal",
-        "Eternal",
         "Eternal",
         "Never-Ending",
         "Unending",
-    ),
+    ) ),
 
-    adjectiveMental : (
-        "Angry",
-        "Bold",
-        "Bold",
-        "Brave",
-        "Brave",
-        "Brave",
-        "Confused",
-        "Cpourageous",
-        "Crazy",
-        "Daring",
-        "Daring",
-        "Daring",
-        "Dedicated",
-        "Defiant",
-        "Defiant",
-        "Defiant",
-        "Determined",
-        "Deviant",
-        "Enraged",
-        "Fearless",
-        "Fearless",
-        "Fearless",
-        "Furious",
-        "Gallant",
-        "Heroic",
-        "Heroic",
-        "Heroic",
-        "Indignant",
-        "Indomitable",
-        "Insane",
-        "Intrepid",
-        "Intrepid",
-        "Reckless",
-        "Reluctant",
-        "Renegade",
-        "Renegade",
-        "Stalwart",
-        "Terrified",
-        "Unrepentant",
-        "Valiant",
-        "Valiant",
-    ),
+    adjectiveMental : BMovieTuple( [
+        "Angry",        1,
+        "Bold",         2,
+        "Brave",        3,
+        "Confused",     1,
+        "Cpourageous",  1,
+        "Crazy",        1,
+        "Daring",       3,
+        "Dedicated",    1,
+        "Defiant",      3,
+        "Determined",   1,
+        "Deviant",      1,
+        "Enraged",      1,
+        "Fearless",     3,
+        "Furious",      1,
+        "Gallant",      1,
+        "Heroic",       3,
+        "Indignant",    1,
+        "Indomitable",  1,
+        "Insane",       1,
+        "Intrepid",     2,
+        "Reckless",     1,
+        "Reluctant",    1,
+        "Renegade",     1,
+        "Stalwart",     1,
+        "Terrified",    1,
+        "Unrepentant",  1,
+        "Valiant",      2,
+    ] ),
 
-    adjectiveCharacterBase : (
-        "Accidental",
-        "All-Powerful",
-        "Amazing",
-        "Amazing",
-        "Beautiful",
-        "Crosstime",
-        "Cybernetic",
-        "Dangerous",
-        "Dangerous",
-        "Deadly",
-        "Deadly",
-        "Dimension-Hopping",
-        "Dreadful",
-        "Evil",
-        "Evil",
-        "Elusive",
-        "Giant",
-        "Gigantic",
-        "Gigantic",
-        "Glorious",
-        "Holy",
-        "Howling",
-        "Huge",
-        "Impossible",
-        "Incredible",
-        "Kick-boxing",
-        "Killer",
-        "Lost",
-        "Lost",
-        "Monstrous",
-        "Morphing",
-        "Mysterious",
-        "Mysterious",
-        "Mysterious",
-        "Powerful",
-        "Screaming",
-        "Teenage",
-        "Time-Travelling",
-        "Transdimensional",
-        "Unkillable",
-        "Unknowable",
-        "Unstoppable",
-        "Wild",
-        "Wild",
-    ),
+    adjectiveCharacterBase : BMovieTuple( [
+        "Accidental",           1,
+        "All-Powerful",         1,
+        "Amazing",              2,
+        "Beautiful",            1,
+        "Crosstime",            1,
+        "Cybernetic",           1,
+        "Dangerous",            2,
+        "Deadly",               2,
+        "Dimension-Hopping",    1,
+        "Dreadful",             1,
+        "Evil",                 2,
+        "Elusive",              1,
+        "Giant",                1,
+        "Gigantic",             2,
+        "Glorious",             1,
+        "Holy",                 1,
+        "Howling",              1,
+        "Huge",                 1,
+        "Impossible",           2,
+        "Kick-boxing",          1,
+        "Killer",               1,
+        "Lost",                 2,
+        "Monstrous",            1,
+        "Morphing",             1,
+        "Mysterious",           3,
+        "Powerful",             1,
+        "Screaming",            1,
+        "Teenage",              1,
+        "Time-Travelling",      1,
+        "Transdimensional",     1,
+        "Unkillable",           1,
+        "Unknowable",           1,
+        "Unstoppable",          1,
+        "Wild",                 2,
+    ] ),
 
-    adjectiveGeographic: (
+    adjectiveGeographic : BMovieTuple( (
         "African",
         "Alien",
         "Altairian",
@@ -305,11 +363,15 @@ wordLists = {
         "Sumerian",
         "Terran",
         "Venusian",
-    ),
+    ) ),
 
-    adjectiveCharacter : (  adjectiveCharacterBase, adjectiveCharacterBase, adjectiveCharacterBase, adjectiveTexture, adjectiveGeographic ),
+    adjectiveCharacter : BMovieTuple( [
+        adjectiveCharacterBase, 3,
+        adjectiveTexture,       1,
+        adjectiveGeographic,    1,
+    ] ),
 
-    adjectiveObjectBase : (
+    adjectiveObjectBase : BMovieTuple( (
         "Adamantine",
         "All-Powerful",
         "Crosstime",
@@ -340,11 +402,15 @@ wordLists = {
         "Time-Travelling",
         "Unknown",
         "Unstoppable",
-    ),
+    ) ),
 
-    adjectiveObject : ( adjectiveObjectBase, adjectiveObjectBase, adjectiveTexture, adjectiveGeographic ),
+    adjectiveObject : BMovieTuple( [
+        adjectiveObjectBase,    2,
+        adjectiveTexture,       1,
+        adjectiveGeographic,    1,
+    ] ),
 
-    adjectivePlaceBase : (
+    adjectivePlaceBase : BMovieTuple( (
         "Amazing",
         "Beautiful",
         "Dangerous",
@@ -375,55 +441,37 @@ wordLists = {
         "Unknown",
         "Vast",
         "Wild",
-    ),
+    ) ),
 
-    adjectivePlace : ( adjectivePlaceBase, adjectivePlaceBase, adjectiveGeographic, adjectiveTexture ),
+    adjectivePlace : BMovieTuple( [
+        adjectivePlaceBase,     2,
+        adjectiveGeographic,    1,
+        adjectiveTexture
+    ] ),
 
-    adjectiveNumber : (
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Three",
-        "Three",
-        "Three",
-        "Three",
-        "Three",
-        "Three",
-        "Three",
-        "Four",
-        "Four",
-        "Four",
-        "Four",
-        "Four",
-        "Four",
-        "Five",
-        "Five",
-        "Five",
-        "Five",
-        "Five",
-        "Six",
-        "Six",
-        "Six",
-        "Six",
-        "Seven",
-        "Seven",
-        "Seven",
-        "Eight",
-        "Eight",
-        "Nine",
-        "Ten",
-        "A Dozen",
-        "One Thousand and One",
-    ),
+    adjectiveNumber : BMovieTuple( [
+        "Two",                  7,
+        "Three",                7,
+        "Four",                 7,
+        "Five",                 6,
+        "Six",                  6,
+        "Seven",                5,
+        "Eight",                5,
+        "Nine",                 5,
+        "Ten",                  4,
+        "A Dozen",              2,
+        "A Hundred",            1,
+        "One Thousand and One", 1,
+    ] ),
 
-    adverbVerb : (
+
+#//**********************************************************************
+#//
+#//  adverbs
+#//
+#//**********************************************************************
+
+    adverbVerb : BMovieTuple( (
         "Accidentally",
         "Bravely",
         "Desperately",
@@ -431,160 +479,158 @@ wordLists = {
         "Furiously",
         "Mysteriously",
         "Savagely",
-    ),
+    ) ),
 
-    adverbAdjective : (
+    adverbAdjective : BMovieTuple( (
         "Amazingly",
         "Impossibly",
         "Mysteriously",
         "Surprisingly",
         "Unbelievably",
-    ),
+    ) ),
 
-    verbPhrasePresentSingularGoing : (
+
+#//**********************************************************************
+#//
+#//  verb phrases
+#//
+#//**********************************************************************
+
+    verbPhrasePresentSingularGoing : BMovieTuple( (
         "Escapes From",
         "Flies To",
         "Goes To",
         "Journeys To",
         "Sails To",
-    ),
+    ) ),
 
-    verbPhrasePresentSingularAttacking : (
+    verbPhrasePresentSingularAttacking : BMovieTuple( (
         "Battles",
         "Captures",
         "Declares War On",
         "Destroys",
-    ),
+    ) ),
 
-    verbPhrasePresentSingularFinding : (
-        "Discovers",
-        "Discovers",
-        "Finds",
-        "Finds",
-        "Seeks",
-        "Uncovers",
-        "Loses",
-        "Loses",
-    ),
+    verbPhrasePresentSingularFinding : BMovieTuple( [
+        "Discovers",    2,
+        "Finds",        2,
+        "Seeks",        1,
+        "Uncovers",     1,
+        "Loses",        1,
+    ] ),
 
-    verbPhrasePresentSingularPlace : (
-        verbPhrasePresentSingularGoing,
-        verbPhrasePresentSingularGoing,
+    verbPhrasePresentSingularPlace : BMovieTuple( [
+        verbPhrasePresentSingularGoing,     2,
+        verbPhrasePresentSingularAttacking, 1,
+        verbPhrasePresentSingularFinding,   1,
+    ] ),
+
+    verbPhrasePresentSingularCharacter : BMovieTuple( (
         verbPhrasePresentSingularAttacking,
         verbPhrasePresentSingularFinding,
-    ),
+    ) ),
 
-    verbPhrasePresentSingularCharacter : (
-        verbPhrasePresentSingularAttacking,
+    verbPhrasePresentSingularObject : BMovieTuple( (
         verbPhrasePresentSingularFinding,
-    ),
+    ) ),
 
-    verbPhrasePresentSingularObject : (
-        verbPhrasePresentSingularFinding,
-    ),
-
-    verbPhrasePresentPluralGoing : (
+    verbPhrasePresentPluralGoing : BMovieTuple( (
         "Escape From",
         "Fly To",
         "Go To",
         "Journey To",
         "Sail To",
-    ),
+    ) ),
 
-    verbPhrasePresentPluralAttacking : (
+    verbPhrasePresentPluralAttacking : BMovieTuple( (
         "Battle",
         "Capture",
         "Declare War On",
         "Destroy",
-    ),
+    ) ),
 
-    verbPhrasePresentPluralFinding : (
-        "Discover",
-        "Discover",
-        "Find",
-        "Find",
-        "Seek",
-        "Uncover",
-        "Lose",
-        "Lose",
-    ),
+    verbPhrasePresentPluralFinding : BMovieTuple( [
+        "Discover", 2,
+        "Find",     2,
+        "Seek",     1,
+        "Uncover",  1,
+        "Lose",     2,
+    ] ),
 
-    verbPhrasePresentPluralPlace : (
-        verbPhrasePresentPluralGoing,
-        verbPhrasePresentPluralGoing,
+    verbPhrasePresentPluralPlace : BMovieTuple ( [
+        verbPhrasePresentPluralGoing,       2,
+        verbPhrasePresentPluralAttacking,   1,
+        verbPhrasePresentPluralFinding,     1,
+    ] ),
+
+    verbPhrasePresentPluralCharacter : BMovieTuple( (
         verbPhrasePresentPluralAttacking,
         verbPhrasePresentPluralFinding,
-    ),
+    ) ),
 
-    verbPhrasePresentPluralCharacter : (
-        verbPhrasePresentPluralAttacking,
+    verbPhrasePresentPluralObject : BMovieTuple( (
         verbPhrasePresentPluralFinding,
-    ),
+    ) ),
 
-    verbPhrasePresentPluralObject : (
-        verbPhrasePresentPluralFinding,
-    ),
-
-    verbPhrasePastCharacter : (
+    verbPhrasePastCharacter : BMovieTuple( (
         verbPhrasePastAttacking,
         verbPhrasePastFinding,
-    ),
+    ) ),
 
-    verbPhrasePastObject : (
+    verbPhrasePastObject : BMovieTuple( (
         verbPhrasePastFinding,
-    ),
+    ) ),
 
-    verbPhrasePastGoing : (
+    verbPhrasePastGoing : BMovieTuple( (
         "Escaped From",
         "Flew To",
         "Went To",
         "Journeyed To",
         "Sailed To",
-    ),
+    ) ),
 
-    verbPhrasePastAttacking : (
+    verbPhrasePastAttacking : BMovieTuple( (
         "Battled",
         "Captured",
         "Declared War On",
         "Destroyed",
-    ),
+    ) ),
 
-    verbPhrasePastFinding : (
+    verbPhrasePastFinding : BMovieTuple( (
         "Discovered",
         "Found",
         "Uncovered",
         "Lost",
-    ),
+    ) ),
 
-    verbPhrasePastPlace : (
-        verbPhrasePastGoing,
-        verbPhrasePastGoing,
+    verbPhrasePastPlace : BMovieTuple( [
+        verbPhrasePastGoing,        2,
+        verbPhrasePastAttacking,    1,
+        verbPhrasePastFinding,      1,
+    ] ),
+
+    verbPhrasePastCharacter : BMovieTuple( (
         verbPhrasePastAttacking,
         verbPhrasePastFinding,
-    ),
+    ) ),
 
-    verbPhrasePastCharacter : (
-        verbPhrasePastAttacking,
+    verbPhrasePastObject : BMovieTuple( (
         verbPhrasePastFinding,
-    ),
+    ) ),
 
-    verbPhrasePastObject : (
-        verbPhrasePastFinding,
-    ),
-
-    verbPhraseFutureCharacter : (
+    verbPhraseFutureCharacter : BMovieTuple( (
         [ "Will", verbPhrasePresentSingularCharacter ]
-    ),
+    ) ),
 
-    verbPhraseFutureObject : (
+    verbPhraseFutureObject : BMovieTuple( (
         [ "Will", verbPhrasePresentSingularObject ]
-    ),
+    ) ),
 
-    verbPhraseFuturePlace : (
+    verbPhraseFuturePlace : BMovieTuple( (
         [ "Will", verbPhrasePresentSingularPlace ]
-    ),
+    ) ),
 
-    verbPhraseGerundCharacter : (
+    verbPhraseGerundCharacter : BMovieTuple( (
         "Approaching",
         "Considering",
         "Defying",
@@ -596,18 +642,18 @@ wordLists = {
         "Running From",
         "Searching For",
         "Seeking",
-    ),
+    ) ),
 
-    verbPhraseGerundObject : (
+    verbPhraseGerundObject : BMovieTuple( (
         "Discovering",
         "Finding",
         "Looking For",
         "Running From",
         "Seeking",
         "Uncovering",
-    ),
+    ) ),
 
-    verbPhraseGerundPlace : (
+    verbPhraseGerundPlace : BMovieTuple( (
         "Approaching",
         "Considering",
         "Defying",
@@ -621,9 +667,16 @@ wordLists = {
         "Running From",
         "Searching For",
         "Seeking",
-    ),
+    ) ),
 
-    namePlaceModifier : (
+
+#//**********************************************************************
+#//
+#//  places
+#//
+#//**********************************************************************
+
+    namePlaceModifier : BMovieTuple( (
         "Central",
         "Darkest",
         "Deepest",
@@ -638,58 +691,48 @@ wordLists = {
         "The Outside of",
         "The Top of",
         "Upper",
-    ),
+    ) ),
 
-    namePlaceArchitectureSingular : (
-        "Castle",
-        "Castle",
-        "Cathedral",
-        "Dungeon",
-        "Fortress",
-        "Fortress",
-        "Inner Sanctum",
-        "Palace",
-        "Palace",
-        "Stronghold",
-        "Stronghold",
-        "Temple",
-        "Temple",
-        "Tower",
-        "Tower",
-    ),
+    namePlaceArchitectureSingular : BMovieTuple( [
+        "Castle",           2,
+        "Cathedral",        1,
+        "Dungeon",          1,
+        "Fortress",         2,
+        "Inner Sanctum",    1,
+        "Palace",           2,
+        "Stronghold",       2,
+        "Temple",           2,
+        "Tower",            2,
+    ] ),
 
-    namePlaceArchitecturePlural : (
-        "Castles",
-        "Castles",
-        "Cathedrals",
-        "Dungeons",
-        "Palaces",
-        "Palaces",
-        "Temples",
-        "Temples",
-        "Towers",
-        "Towers",
-    ),
+    namePlaceArchitecturePlural : BMovieTuple( [
+        "Castles",          2,
+        "Cathedrals",       1,
+        "Dungeons",         1,
+        "Palaces",          2,
+        "Temples",          2,
+        "Towers",           2,
+    ] ),
 
-    namePlaceTerritorySingular : (
+    namePlaceTerritorySingular : BMovieTuple( (
         "City",
         "Empire",
         "Kingdom",
         "Republic",
         "Territory",
         "City-State",
-    ),
+    ) ),
 
-    namePlaceTerritoryPlural : (
+    namePlaceTerritoryPlural : BMovieTuple( (
         "Cities",
         "Empires",
         "Kingdoms",
         "Republics",
         "Territories",
         "City-States",
-    ),
+    ) ),
 
-    namePlaceGeographySingular : (
+    namePlaceGeographySingular : BMovieTuple( (
         "Cave",
         "Cavern",
         "Continent",
@@ -710,9 +753,9 @@ wordLists = {
         "Universe",
         "Volcano",
         "Wasteland",
-    ),
+    ) ),
 
-    namePlaceGeographyPlural : (
+    namePlaceGeographyPlural : BMovieTuple( (
         "Caverns",
         "Caves",
         "Deserts",
@@ -728,51 +771,29 @@ wordLists = {
         "Seas",
         "Swamps",
         "Wastelands",
+    ) ),
+
+    namePlaceCommon : BMovieTuple( [
+        namePlaceArchitecturePlural,    1,
+        namePlaceArchitectureSingular,  1,
+        namePlaceGeographyPlural,       2,
+        namePlaceGeographySingular,     2,
+        namePlaceTerritoryPlural,       1,
+        namePlaceTerritorySingular,     2,
     ),
 
-    namePlaceCommon : (
-        namePlaceArchitecturePlural,
-        namePlaceArchitectureSingular,
-        namePlaceGeographyPlural,
-        namePlaceGeographyPlural,
-        namePlaceGeographySingular,
-        namePlaceGeographySingular,
-        namePlaceTerritoryPlural,
-        namePlaceTerritorySingular,
-        namePlaceTerritorySingular,
-    ),
+    namePlaceProper : BMovieTuple( [
+        namePlaceProperSimple,                                          6,
+        [ namePlaceModifier, namePlaceProperSimple ],                   2,
+        [ 'The', namePlaceProperArticle ],                              6,
+        [ 'The', adjectivePlace, namePlaceCommon ],                     4,
+        [ 'The', adjectivePlace, namePlaceProperArticle ],              4,
+        [ 'The', namePlaceCommon, 'of', nameConcept ],                  2,
+        [ 'The', namePlaceCommon, 'of', namePlaceProperSimple ],        1,
+        [ 'The', namePlaceCommon, 'of The', namePlaceProperArticle ],   1,
+    ] ),
 
-    namePlaceProper : (
-        namePlaceProperSimple,
-        namePlaceProperSimple,
-        namePlaceProperSimple,
-        namePlaceProperSimple,
-        namePlaceProperSimple,
-        namePlaceProperSimple,
-        [ namePlaceModifier, namePlaceProperSimple ],
-        [ namePlaceModifier, namePlaceProperSimple ],
-        [ 'The', namePlaceProperArticle ],
-        [ 'The', namePlaceProperArticle ],
-        [ 'The', namePlaceProperArticle ],
-        [ 'The', namePlaceProperArticle ],
-        [ 'The', namePlaceProperArticle ],
-        [ 'The', namePlaceProperArticle ],
-        [ 'The', adjectivePlace, namePlaceCommon ],
-        [ 'The', adjectivePlace, namePlaceCommon ],
-        [ 'The', adjectivePlace, namePlaceCommon ],
-        [ 'The', adjectivePlace, namePlaceCommon ],
-        [ 'The', adjectivePlace, namePlaceProperArticle ],
-        [ 'The', adjectivePlace, namePlaceProperArticle ],
-        [ 'The', adjectivePlace, namePlaceProperArticle ],
-        [ 'The', adjectivePlace, namePlaceProperArticle ],
-        [ 'The', namePlaceCommon, 'of', nameConcept ],
-        [ 'The', adjectiveObject, namePlaceCommon ],
-        [ 'The', adjectiveObject, namePlaceCommon ],
-        [ 'The', namePlaceCommon, 'of', namePlaceProperSimple ],
-        [ 'The', namePlaceCommon, 'of The', namePlaceProperArticle ],
-    ),
-
-    namePlaceProperSimple : (
+    namePlaceProperSimple : BMovieTuple( (
         "Africa",
         "Aldebaran",
         "Altair",
@@ -827,74 +848,68 @@ wordLists = {
         "Venus",
         "Washington",
         "Wongo Wongo",
+     ),
+
+    namePlaceProperArticle : BMovieTuple( [
+        "Amazon",                           2,
+        "Andes",                            1,
+        "Andromeda Galaxy",                 1,
+        "Beginning of Time",                2,
+        "Burmuda Triangle",                 1,
+        "Congo",                            1,
+        "Distant Future",                   1,
+        "Distant Past",                     1,
+        "Eighth Dimension",                 1,
+        "Eighth Planet",                    1,
+        "Eleventh Planet",                  1,
+        "End of Time",                      2,
+        "Fifth Dimension",                  1,
+        "Fourth Dimension",                 1,
+        "Future",                           2,
+        "Himalayas",                        1,
+        "Jungle",                           1,
+        "Land Before Time",                 1,
+        "Land of Oz",                       1,
+        "Lost World",                       2,
+        "Marianas Trench",                  1,
+        "Milky Way",                        1,
+        "Moon",                             1,
+        "New World",                        1,
+        "Ninth Dimension",                  1,
+        "Ninth Planet",                     1,
+        "North Pole",                       1,
+        "Occident",                         1,
+        "OK Corral",                        1,
+        "Old World",                        1,
+        "Orient",                           1,
+        "Outback",                          1,
+        "Past",                             2,
+        "Pleiades",                         1,
+        "River Kwai",                       1,
+        "Sargasso Sea",                     1,
+        "Seven Seas",                       3,
+        "Seventh Dimension",                1,
+        "Sixth Dimension",                  1,
+        "South Pole",                       3,
+        "Tenth Planet",                     1,
+        "Thirteenth Planet",                1,
+        "Twelfth Planet",                   1,
+        "Wild West",                        3,
+        [ "City of", nameConcept ],         1,
+        [ "Forest of", nameConcept ],       1,
+        [ "Island of", nameConcept ],       1,
+        [ "Lost City of", nameConcept ],    1,
+        [ "Mountains of", nameConcept ],    1,
+        [ "River of", nameConcept ],        1,
     ),
 
-    namePlaceProperArticle : (
-        "Amazon",
-        "Amazon",
-        "Andes",
-        "Andromeda Galaxy",
-        "Beginning of Time",
-        "Beginning of Time",
-        "Burmuda Triangle",
-        "Congo",
-        "Distant Future",
-        "Distant Past",
-        "Eighth Dimension",
-        "Eighth Planet",
-        "Eleventh Planet",
-        "End of Time",
-        "End of Time",
-        "Fifth Dimension",
-        "Fourth Dimension",
-        "Future",
-        "Future",
-        "Himalayas",
-        "Jungle",
-        "Land Before Time",
-        "Land of Oz",
-        "Lost World",
-        "Lost World",
-        "Marianas Trench",
-        "Milky Way",
-        "Moon",
-        "New World",
-        "Ninth Dimension",
-        "Ninth Planet",
-        "North Pole",
-        "Occident",
-        "OK Corral",
-        "Old World",
-        "Orient",
-        "Outback",
-        "Past",
-        "Past",
-        "Pleiades",
-        "River Kwai",
-        "Sargasso Sea",
-        "Seven Seas",
-        "Seven Seas",
-        "Seven Seas",
-        "Seventh Dimension",
-        "Sixth Dimension",
-        "South Pole",
-        "South Pole",
-        "South Pole",
-        "Tenth Planet",
-        "Thirteenth Planet",
-        "Twelfth Planet",
-        "Wild West",
-        "Wild West",
-        "Wild West",
-        [ "City of", nameConcept ],
-        [ "Forest of", nameConcept ],
-        [ "Island of", nameConcept ],
-        [ "Lost City of", nameConcept ],
-        [ "Mountains of", nameConcept ],
-        [ "River of", nameConcept ],
-    ),
+#//**********************************************************************
+#//
+#//  heroes
+#//
+#//**********************************************************************
 
-    nameCharacterSingularLeader : (
+    nameHeroSingularLeader : (
         "Abbot",
         "Baron",
         "Bishop",
@@ -971,7 +986,7 @@ wordLists = {
         "Wizard",
     ),
 
-    nameCharacterPluralLeader : (
+    nameHeroPluralLeader : (
         "Barons",
         "Bishops",
         "Chieftains",
@@ -1021,7 +1036,7 @@ wordLists = {
         "Wizards",
     ),
 
-    nameCharacterSingularCommon : (
+    nameHeroSingularCommon : (
         "Alien",
         "Ape",
         "Cat",
@@ -1055,7 +1070,7 @@ wordLists = {
         "Wizard",
     ),
 
-    nameCharacterSingularProperSimple : (
+    nameHeroSingularProperSimple : (
         "Abraham Lincoln",
         "Albert Einstein",
         "Bruce Lee",
@@ -1106,9 +1121,8 @@ wordLists = {
         "Tom Servo",
     ),
 
-    nameCharacterSingularProperSimplePossessive : makeNameCharacterSingularProperSimplePossessive,
 
-    nameCharacterPluralCommon : (
+    nameHeroPluralCommon : (
         "Aliens",
         "Apes",
         "Barbarians",
@@ -1145,7 +1159,7 @@ wordLists = {
         "Warriors",
     ),
 
-    nameCharacterPluralProperSimple : (
+    nameHeroPluralProperSimple : (
         "Abbott and Costello",
         "Penn and Teller",
         "The Beatles",
@@ -1157,12 +1171,12 @@ wordLists = {
         "The Three Stooges",
     ),
 
-    nameCharacterSingularProper : (
-        [ nameCharacterSingularProperSimple ],
-        [ nameCharacterSingularProperSimple ],
-        [ nameCharacterSingularProperSimple ],
-        [ nameCharacterSingularProperSimple ],
-        [ nameCharacterSingularProperSimple ],
+    nameHeroSingularProper : (
+        [ nameHeroSingularProperSimple ],
+        [ nameHeroSingularProperSimple ],
+        [ nameHeroSingularProperSimple ],
+        [ nameHeroSingularProperSimple ],
+        [ nameHeroSingularProperSimple ],
         [ nameGroupDescription, nameGroupTypePrepend ],
         [ nameGroupDescription, nameGroupTypePrepend ],
         [ nameGroupDescription, nameGroupTypePrepend ],
@@ -1177,32 +1191,366 @@ wordLists = {
         [ nameConcept, nameGroupTypePrepend ],
     ),
 
-    nameCharacterPluralProper : (
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ nameCharacterPluralProperSimple ],
-        [ 'The', adjectiveCharacter, nameCharacterPluralCommon ],
-        [ 'The', adjectiveCharacter, nameCharacterPluralCommon ],
-        [ 'The', adjectiveCharacter, nameCharacterPluralCommon, 'of', nameConcept ],
-        [ 'The', adjectiveCharacterBase, nameCharacterPluralCommon ],
-        [ 'The', adjectiveCharacterBase, nameCharacterPluralCommon ],
-        [ 'The', adjectiveObject, nameCharacterPluralCommon ],
-        [ 'The', adjectiveObject, nameCharacterPluralCommon ],
-        [ 'The', adjectiveObject, nameCharacterPluralCommon, 'of The', nameDirection ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon ],
-        [ 'The', nameCharacterPluralCommon, 'of The', nameDirection ],
+    nameHeroPluralProper : (
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ nameHeroPluralProperSimple ],
+        [ 'The', adjectiveCharacter, nameHeroPluralCommon ],
+        [ 'The', adjectiveCharacter, nameHeroPluralCommon ],
+        [ 'The', adjectiveCharacter, nameHeroPluralCommon, 'of', nameConcept ],
+        [ 'The', adjectiveCharacterBase, nameHeroPluralCommon ],
+        [ 'The', adjectiveCharacterBase, nameHeroPluralCommon ],
+        [ 'The', adjectiveObject, nameHeroPluralCommon ],
+        [ 'The', adjectiveObject, nameHeroPluralCommon ],
+        [ 'The', adjectiveObject, nameHeroPluralCommon, 'of The', nameDirection ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon ],
+        [ 'The', nameHeroPluralCommon, 'of The', nameDirection ],
     ),
+
+    nameHeroSingularProperSimplePossessive : makeNameHeroSingularProperSimplePossessive,
+    nameHeroPluralProperSimplePossessive : makeNameHeroPluralProperSimplePossessive,
+
+
+#//**********************************************************************
+#//
+#//  villains
+#//
+#//**********************************************************************
+
+    nameVillainSingularLeader : (
+        "Abbot",
+        "Baron",
+        "Bishop",
+        "Caliph",
+        "Chieftain",
+        "Chieftain",
+        "Commander",
+        "Commander",
+        "Commander",
+        "Congress",
+        "Count",
+        "Count",
+        "Countess",
+        "Duchess",
+        "Duke",
+        "Duke",
+        "Earl",
+        "Emperor",
+        "Emperor",
+        "Emperor",
+        "Emperor",
+        "Emperoress",
+        "Emperoress",
+        "Hero",
+        "Hero",
+        "Hero",
+        "Hero",
+        "Heroine",
+        "Heroine",
+        "Heroine",
+        "Heroine",
+        "King",
+        "King",
+        "King",
+        "King",
+        "Knight",
+        "Knight",
+        "Knight",
+        "Lord",
+        "Lord",
+        "Lord",
+        "Master",
+        "Master",
+        "Parliament",
+        "Patrician",
+        "Pope",
+        "President",
+        "Priest",
+        "Priest",
+        "Priest",
+        "Prime Minister",
+        "Prince",
+        "Prince",
+        "Prince",
+        "Princess",
+        "Princess",
+        "Princess",
+        "Prophet",
+        "Prophet",
+        "Prophet",
+        "Queen",
+        "Queen",
+        "Queen",
+        "Queen",
+        "Raj",
+        "Ruler",
+        "Ruler",
+        "Sheik",
+        "Tyrant",
+        "Tyrant",
+        "Tyrant",
+        "Viscount",
+        "Wizard",
+        "Wizard",
+    ),
+
+    nameVillainPluralLeader : (
+        "Barons",
+        "Bishops",
+        "Chieftains",
+        "Chieftains",
+        "Chieftains",
+        "Commanders",
+        "Commanders",
+        "Commanders",
+        "Counts",
+        "Dukes",
+        "Heroes",
+        "Heroes",
+        "Heroes",
+        "Heroes",
+        "Kings",
+        "Kings",
+        "Kings",
+        "Knights",
+        "Knights",
+        "Knights",
+        "Knights",
+        "Lords",
+        "Lords",
+        "Lords",
+        "Masters",
+        "Masters",
+        "Masters",
+        "Priests",
+        "Priests",
+        "Priests",
+        "Princes",
+        "Princes",
+        "Princes",
+        "Prophets",
+        "Prophets",
+        "Prophets",
+        "Queens",
+        "Queens",
+        "Rulers",
+        "Rulers",
+        "Sheiks",
+        "Tyrants",
+        "Tyrants",
+        "Tyrants",
+        "Wizards",
+        "Wizards",
+        "Wizards",
+    ),
+
+    nameVillainSingularCommon : (
+        "Alien",
+        "Ape",
+        "Cat",
+        "Commando",
+        "Dog",
+        "Dwarf",
+        "Elf",
+        "Gangster",
+        "Gorilla",
+        "Hero",
+        "Kid",
+        "King",
+        "Knight",
+        "Mummy",
+        "Pauper",
+        "Prince",
+        "Queen",
+        "Princess",
+        "President",
+        "Rebel",
+        "Robot",
+        "Mechanoid",
+        "Sheriff",
+        "Soldier",
+        "Spy",
+        "Stranger",
+        "Thief",
+        "Traitor",
+        "Vampire",
+        "Villain",
+        "Wizard",
+    ),
+
+    nameVillainSingularProperSimple : (
+        "Abraham Lincoln",
+        "Albert Einstein",
+        "Bruce Lee",
+        "Colossus",
+        "Commando Cody",
+        "Crow T. Robot",
+        "Delta Force",
+        "Don Juan",
+        "Dr. Z",
+        "Dracula",
+        "El Santo",
+        "Frankenstein",
+        "Fu Manchu",
+        "Gamera",
+        "Gilgamesh",
+        "Godzilla",
+        "Harcourt Fenton Mudd",
+        "Hercules",
+        "Indiana Jones",
+        "Jackie Chan",
+        "Jared Syn",
+        "Jet Jaguar",
+        "King Arthur",
+        "Lord Byron",
+        "Lord Nelson",
+        "Mark Twain",
+        "Merlin",
+        "Mitchell",
+        "Mothra",
+        "Nosferatu",
+        "Perseus",
+        "Philo T. Farnsworth",
+        "Robin Hood",
+        "Rocky Jones",
+        "Samson",
+        "Santa Claus",
+        "Sherlock Holmes",
+        "Sir Galahad",
+        "Sir Lancelot",
+        "Teddy Roosevelt",
+        "The Cowardly Lion",
+        "The Ice Cream Bunny",
+        "The Scarecrow",
+        "The Sheriff of Nottingham",
+        "The Tin Man",
+        "The Treehouse Club",
+        "Thomas Edison",
+        "Tom Servo",
+    ),
+
+    nameVillainPluralCommon : (
+        "Aliens",
+        "Apes",
+        "Barbarians",
+        "Clones",
+        "Commandos",
+        "Dinosaurs",
+        "Dolphins",
+        "Dwarves",
+        "Earthlings",
+        "Gangsters",
+        "Ghosts",
+        "Gorillas",
+        "Hordes",
+        "Jovians",
+        "Kings",
+        "Lunarians",
+        "Martians",
+        "Mecurians",
+        "Mummies",
+        "Neptunians",
+        "Plutonians",
+        "Prisoners",
+        "Robots",
+        "Saturnians",
+        "Savages",
+        "Spirits",
+        "Terrans",
+        "Throngs",
+        "Titanians",
+        "Uranians",
+        "Vampires",
+        "Venusians",
+        "Vikings",
+        "Warriors",
+    ),
+
+    nameVillainPluralProperSimple : (
+        "Abbott and Costello",
+        "Penn and Teller",
+        "The Beatles",
+        "The Green Berets",
+        "The Hawklords",
+        "The Martians",
+        "The Space Marines",
+        "The Space Rangers",
+        "The Three Stooges",
+    ),
+
+    nameVillainSingularProper : (
+        [ nameVillainSingularProperSimple ],
+        [ nameVillainSingularProperSimple ],
+        [ nameVillainSingularProperSimple ],
+        [ nameVillainSingularProperSimple ],
+        [ nameVillainSingularProperSimple ],
+        [ nameGroupDescription, nameGroupTypePrepend ],
+        [ nameGroupDescription, nameGroupTypePrepend ],
+        [ nameGroupDescription, nameGroupTypePrepend ],
+        [ nameGroupPrepend, nameGroupTypePrepend ],
+        [ nameGroupPrepend, nameGroupTypePrepend ],
+        [ nameGroupPrepend, nameGroupTypePrepend ],
+        [ nameGroupTypeAppend, nameGroupAppend ],
+        [ nameGroupTypeAppend, nameGroupDescription ],
+        [ nameGroupTypeAppend, nameGroupDescription ],
+        [ nameGroupTypeAppend, nameGroupDescription ],
+        [ 'The', nameGroupTypeAppend, 'of', nameConcept ],
+        [ nameConcept, nameGroupTypePrepend ],
+    ),
+
+    nameVillainPluralProper : (
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ nameVillainPluralProperSimple ],
+        [ 'The', adjectiveCharacter, nameVillainPluralCommon ],
+        [ 'The', adjectiveCharacter, nameVillainPluralCommon ],
+        [ 'The', adjectiveCharacter, nameVillainPluralCommon, 'of', nameConcept ],
+        [ 'The', adjectiveCharacterBase, nameVillainPluralCommon ],
+        [ 'The', adjectiveCharacterBase, nameVillainPluralCommon ],
+        [ 'The', adjectiveObject, nameVillainPluralCommon ],
+        [ 'The', adjectiveObject, nameVillainPluralCommon ],
+        [ 'The', adjectiveObject, nameVillainPluralCommon, 'of The', nameDirection ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon ],
+        [ 'The', nameVillainPluralCommon, 'of The', nameDirection ],
+    ),
+
+    nameVillainSingularProperSimplePossessive : makeNameVillainSingularProperSimplePossessive,
+    nameVillainPluralProperSimplePossessive : makeNameVillainPluralProperSimplePossessive,
+
+    nameCharacterSingularProper : ( nameHeroSingularProper, nameVillainSingularProper ),
+    nameCharacterPluralProper : ( nameHeroPluralProper, nameVillainPluralProper ),
+
+    nameCharacterSingularProperSimplePossessive : ( nameHeroSingularProperSimplePossessive, nameHeroPluralProperSimplePossessive ),
+    nameCharacterSingularProperSimplePossessive : ( nameVillainSingularProperSimplePossessive, nameVillainPluralProperSimplePossessive ),
+
+
+#//**********************************************************************
+#//
+#//  groups
+#//
+#//**********************************************************************
 
     nameGroupTypePrepend : (
         "Batallion",
@@ -1833,7 +2181,7 @@ wordLists = {
         "Underneath",
     ),
 
-    prepositionalPhrasePluralProper : (
+    prepositionalPhrasePluralProper : [
         "Against",
         "Alone In",
         "Amidst",
@@ -1847,8 +2195,15 @@ wordLists = {
         "Near",
         "Outside",
         "Underneath",
-    ),
+    ],
 }
+
+
+#//**********************************************************************
+#//
+#//  titles
+#//
+#//**********************************************************************
 
 titleTypes = (
     [
@@ -1859,7 +2214,7 @@ titleTypes = (
     [
         'The',
         adjectiveCharacter,
-        nameCharacterSingularCommon,
+        ( nameHeroSingularCommon, nameVillainSingularCommon ),
     ],
     [
         'To',
@@ -1879,7 +2234,7 @@ titleTypes = (
     [
         ( [ 'The', nameEventSingular ], [ 'The', nameEventPlural ], [ 'The', ( adjectiveObject, adjectiveObject, adjectiveObject, adjectiveNumber ), nameEventPlural ], [ 'The', adjectiveObject, nameEventSingular ], [ 'The', ( adjectiveObject, adjectiveObject, adjectiveCharacter, adjectiveNumber ), namePossessionPlural ] ),
         'of',
-        ( nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterPluralProper, nameCharacterPluralProper, nameCharacterPluralProper, [ 'The', nameCharacterSingularCommon ], [ 'The', nameCharacterSingularCommon ] ),
+        ( nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterPluralProper, nameCharacterPluralProper, nameCharacterPluralProper, [ 'The', nameHeroSingularCommon ], [ 'The', nameHeroSingularCommon ], [ 'The', nameVillainSingularCommon ], [ 'The', nameVillainSingularCommon ], ),
     ],
     [
         ( [ 'The', ( namePossessionSingular, nameEventSingular ) ], [ 'The', ( namePossessionSingular, nameEventSingular ) ], [ 'The', ( namePossessionPlural, nameEventPlural ) ] ),
@@ -1890,7 +2245,7 @@ titleTypes = (
         'The',
         ( namePossessionSingular, namePossessionPlural ),
         'of The',
-        nameCharacterPluralCommon,
+        ( nameHeroPluralCommon, nameVillainPluralCommon ),
     ],
     [
         ( [ 'The', namePossessionSingular ], [ 'The', namePossessionSingular ], [ 'The', namePossessionPlural ] ),
@@ -1971,7 +2326,7 @@ titleTypes = (
     ],
     [
         adjectiveNumber,
-        ( [ adjectiveObject, nameObjectPluralCommon ], [ adjectiveCharacter, nameCharacterPluralCommon ] )
+        ( [ adjectiveObject, nameObjectPluralCommon ], [ adjectiveCharacter, ( nameHeroPluralCommon, nameVillainPluralCommon ) ] )
     ],
     [
         'The',
@@ -2176,26 +2531,26 @@ titleTypes = (
         namePlaceCommon,
     ],
     [
-        nameCharacterSingularCommon,
+        nameHeroSingularCommon,
         ( 'With A', 'Without A' ),
         ( nameObjectSingularCommon, nameObjectSingularCommon, nameObjectSingularCommon, [ adjectiveObject, nameObjectSingularCommon ] ),
     ],
     [
-        nameCharacterPluralCommon,
+        nameHeroPluralCommon,
         ( 'With', 'Without' ),
         ( nameObjectPluralCommon, nameObjectPluralCommon, nameObjectPluralCommon, [ adjectiveObject, nameObjectPluralCommon ], nameConcept ),
     ],
     [
-        nameCharacterSingularProper,
+        nameHeroSingularProper,
         'and The',
         adjectiveCharacter,
-        nameCharacterPluralCommon,
+        nameHeroPluralCommon,
     ],
     [
-        nameCharacterSingularProper,
+        nameHeroSingularProper,
         'and The',
         adjectiveCharacter,
-        nameCharacterPluralCommon,
+        nameHeroPluralCommon,
     ],
     [
         'Between',
@@ -2219,40 +2574,40 @@ titleTypes = (
         'A',
         nameGroupTypePrepend,
         'of',
-        ( nameCharacterPluralCommon, nameCharacterPluralCommon, [ adjectiveCharacter, nameCharacterPluralCommon ] ),
+        ( nameHeroPluralCommon, nameHeroPluralCommon, nameVillainPluralCommon, nameVillainPluralCommon, [ adjectiveCharacter, nameHeroPluralCommon ], [ adjectiveCharacter, nameHeroPluralCommon ] ),
     ],
     [
         'A',
         nameGroupTypePrepend,
         'of',
-        ( nameCharacterPluralCommon, nameCharacterPluralCommon, [ adjectiveCharacter, nameCharacterPluralCommon ] ),
+        ( nameHeroPluralCommon, nameHeroPluralCommon, nameVillainPluralCommon, nameVillainPluralCommon, [ adjectiveCharacter, nameHeroPluralCommon ], [ adjectiveCharacter, nameHeroPluralCommon ] ),
     ],
     [
         'A',
-        nameCharacterSingularCommon,
+        nameHeroSingularCommon,
         ( 'of', 'From' ),
         ( namePlaceProper, namePlaceProper, namePlaceProper, nameConcept ),
     ],
     [
         'A',
-        nameCharacterSingularCommon,
+        nameHeroSingularCommon,
         ( 'of', 'From' ),
         ( namePlaceProper, namePlaceProper, namePlaceProper, nameConcept ),
     ],
     [
         'The',
-        ( nameEventPlural, nameEventPlural, namePossessionSingular, namePossessionSingular, namePossessionPlural, [ adjectiveCharacter, namePossessionPlural ], [ adjectiveCharacter, namePossessionPlural ], nameEventPlural, [ adjectiveObject, nameEventPlural ], nameCharacterSingularLeader, nameCharacterSingularLeader, nameCharacterPluralLeader ),
+        ( nameEventPlural, nameEventPlural, namePossessionSingular, namePossessionSingular, namePossessionPlural, [ adjectiveCharacter, namePossessionPlural ], [ adjectiveCharacter, namePossessionPlural ], nameEventPlural, [ adjectiveObject, nameEventPlural ], nameHeroSingularLeader, nameHeroSingularLeader, nameHeroPluralLeader ),
         'of',
-        nameCharacterSingularProper
+        nameHeroSingularProper
     ],
     [
         'The',
-        ( nameEventPlural, nameEventPlural, namePossessionSingular, namePossessionSingular, namePossessionPlural, [ adjectiveCharacter, namePossessionPlural ], [ adjectiveCharacter, namePossessionPlural ], nameEventPlural, [ adjectiveObject, nameEventPlural ], nameCharacterSingularLeader, nameCharacterSingularLeader, nameCharacterPluralLeader ),
+        ( nameEventPlural, nameEventPlural, namePossessionSingular, namePossessionSingular, namePossessionPlural, [ adjectiveCharacter, namePossessionPlural ], [ adjectiveCharacter, namePossessionPlural ], nameEventPlural, [ adjectiveObject, nameEventPlural ], nameHeroSingularLeader, nameHeroSingularLeader, nameHeroPluralLeader ),
         'of',
-        nameCharacterSingularProper
+        nameHeroSingularProper
     ],
     [
-        nameCharacterSingularProper,
+        nameHeroSingularProper,
         prepositionalPhraseSingularCommon,
         namePlaceProper,
     ],
@@ -2279,22 +2634,22 @@ titleTypes = (
     [
         "I Was A",
         adjectiveCharacter,
-        nameCharacterSingularCommon,
+        nameVillainSingularCommon,
     ],
     [
         ( 'The', 'A' ),
-        nameCharacterSingularLeader,
+        nameHeroSingularLeader,
         'of',
         ( nameCharacterPluralProper, namePlaceProper ),
     ],
     [
         ( 'The', 'A' ),
-        nameCharacterSingularLeader,
+        nameHeroSingularLeader,
         'of',
         ( nameCharacterPluralProper, namePlaceProper ),
     ],
     [
-        ( nameCharacterSingularProper, nameCharacterPluralProper, [ 'The', nameEventSingular ], nameEventPlural ),
+        ( nameHeroSingularProper, nameHeroPluralProper, [ 'The', nameEventSingular ], nameEventPlural ),
         prepositionalPhraseEvent,
         'The',
         ( nameEventSingular, nameEventPlural ),
@@ -2324,15 +2679,15 @@ titleTypes = (
     ],
     [
         'The',
-        nameCharacterSingularLeader,
+        nameHeroSingularLeader,
         'of',
         nameConcept,
     ],
     [
         'The',
-        nameCharacterSingularLeader,
+        nameHeroSingularLeader,
         'of',
-        nameCharacterPluralCommon,
+        nameHeroPluralCommon,
     ],
     [
         ( verbPhraseGerundCharacter, verbPhraseGerundPlace, verbPhraseGerundObject ),
@@ -2434,7 +2789,7 @@ titleTypes = (
 def getWord( wordType ):
     if type( wordType ) is int:
         return getWord( wordLists[ wordType ] )
-    elif type( wordType ) is tuple:
+    elif type( wordType ) in ( tuple, BMovieTuple ):
         return getWord( random.choice( wordType ) )
     elif type( wordType ) is str:
         return wordType
@@ -2490,7 +2845,8 @@ def main( ):
     count = args.count
 
     for i in range( 0, count ):
-        print( getTitle( ) )
+        # print( getTitle( ) )
+        print( getWord( prepositionalPhrasePluralProper ) )
 
 
 #//**********************************************************************
