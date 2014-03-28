@@ -7,58 +7,99 @@ import string
 
 #//**********************************************************************
 #//
-#//  BMovieTuple
+#//  WeightedTuple
 #//
-#//  This class extends choice( ) by allowing for tracking most-recently
-#//  selected items and making sure it doesn't choose the same item
-#//  within a certain threshold of choices.
+#//  This class has a choice( ) function that allows for tracking
+#//  most-recently selected items and making sure it doesn't choose the
+#//  same item within a certain threshold of choices.
 #//
-#//  The threshold is calculated to be half
+#//  The threshold is calculated to be half the length of the list
+#//  of unique choices rounded up.
+#//
+#//  There really isn't anything tuple-ish about this class, but it
+#//  is used like a plan tuple in the data structures.
 #//
 #//**********************************************************************
 
-class BMovieTuple( object ):
+class WeightedTuple( object ):
     def __init__( self, values ):
-        global wordListCounts
-
         if type( values ) is list:
-            self.values = [ [ item ] * repeat for item, repeat in zip( values[ : : 2 ], values[ 1 : : 2 ] ) ]
-            #print( "1 --> ", end='' )
-            #print( self.values )
-            self.values = [ item for sublist in self.values for item in sublist ]
-            #print( "2 --> ", end='' )
-            #print( self.values )
-        else:
+            self.values = [ ]
+
+            for i in range( 0, len( values ) - 1, 2 ):
+                self.values.extend( [ values[ i ] ] * values[ i + 1 ] )
+
+            if len( values ) > 4:
+                self.maxHistory = ( len( values ) / 4 ) + 1
+            elif len( values ) == 4:
+                self.maxHistory = 1
+            else:
+                self.maxHistory = 0
+        elif type( values ) is tuple:
             self.values = values
+
+            uniqueItems = len( set( self.values ) )
+
+            #print( self.values )
+            #print( "unique: " + format( uniqueItems ) )
+
+            if uniqueItems > 2:
+                self.maxHistory = int( uniqueItems / 2 ) + 1
+            elif uniqueItems == 2:
+                self.maxHistory = 1
+            else:
+                self.maxHistory = 0
 
         self.mru = list( )
 
-        if len( self.values ) > 2:
-            self.maxHistory = len( self.values ) + 1
-        elif len( self.values ) == 2:
-            self.maxHistory = 1
-        else:
-            self.maxHistory = 0
-
     def choice( self ):
+        #print( self.values )
         while True:
-            result = self.values.choice( )
+            result = random.choice( self.values )
 
             if result not in self.mru:
                 break
 
         self.mru.append( result )
 
-        if len( self.mru ) > len( self.values ) / 2:
+        if len( self.mru ) > self.maxHistory:
             self.mru = self.mru[ 1 : ]
 
-        return self.values[ index ]
+        return result
 
     def __len__( self ):
         return len( self.values )
 
     def __getitem__( self, key ):
         return self.values[ key ]
+
+
+#//**********************************************************************
+#//
+#//  makePossessive
+#//
+#//**********************************************************************
+
+def makePossessive( wordType ):
+    result = getWord( wordType )
+
+    if result[ -1 ] == 's':
+        return result + "'"
+    else:
+        return result + "'s"
+
+
+def makeNameHeroSingularProperSimplePossessive( ):
+    return makePossessive( nameHeroSingularProperSimple )
+
+def makeNameHeroPluralProperSimplePossessive( ):
+    return makePossessive( nameHeroPluralProperSimple )
+
+def makeNameVillainSingularProperSimplePossessive( ):
+    return makePossessive( nameVillainSingularProperSimple )
+
+def makeNameVillainPluralProperSimplePossessive( ):
+    return makePossessive( nameVillainPluralProperSimple )
 
 
 #//**********************************************************************
@@ -191,30 +232,22 @@ prepositionalPhraseEvent                    = 214
 
 #//**********************************************************************
 #//
-#//  makePossessive
+#//  replaceList
 #//
 #//**********************************************************************
 
-def makePossessive( wordType ):
-    result = getWord( wordType )
-
-    if result[ -1 ] == 's':
-        return result + "'"
-    else:
-        return result + "'s"
-
-
-def makeNameHeroSingularProperSimplePossessive( ):
-    return makePossessive( nameHeroSingularProperSimple )
-
-def makeNameHeroPluralProperSimplePossessive( ):
-    return makePossessive( nameHeroPluralProperSimple )
-
-def makeNameVillainSingularProperSimplePossessive( ):
-    return makePossessive( nameVillainSingularProperSimple )
-
-def makeNameVillainPluralProperSimplePossessive( ):
-    return makePossessive( nameVillainPluralProperSimple )
+replaceList = [
+    "A A", "An A",
+    "A E", "An E",
+    "A I", "An I",
+    "A O", "An O",
+    "A U", "An U",
+    "An Uni", "A Uni",
+    "A Hour", "An Hour",
+    "In The Edge", "On The Edge",
+    " ,", ",",
+    " :", ":",
+]
 
 
 
@@ -226,7 +259,7 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    adjectiveTexture : BMovieTuple( [
+    adjectiveTexture : WeightedTuple( [
         "Alabaster",    1,
         "Amber",        2,
         "Azure",        1,
@@ -255,14 +288,14 @@ wordLists = {
         "Yellow",       1,
     ] ),
 
-    adjectiveTime : BMovieTuple( (
+    adjectiveTime : WeightedTuple( (
         "Ancient",
         "Eternal",
         "Never-Ending",
         "Unending",
     ) ),
 
-    adjectiveMental : BMovieTuple( [
+    adjectiveMental : WeightedTuple( [
         "Angry",        1,
         "Bold",         2,
         "Brave",        3,
@@ -292,7 +325,7 @@ wordLists = {
         "Valiant",      2,
     ] ),
 
-    adjectiveCharacterBase : BMovieTuple( [
+    adjectiveCharacterBase : WeightedTuple( [
         "Accidental",           1,
         "All-Powerful",         1,
         "Amazing",              2,
@@ -329,7 +362,7 @@ wordLists = {
         "Wild",                 2,
     ] ),
 
-    adjectiveGeographic : BMovieTuple( (
+    adjectiveGeographic : WeightedTuple( (
         "African",
         "Alien",
         "Altairian",
@@ -365,13 +398,13 @@ wordLists = {
         "Venusian",
     ) ),
 
-    adjectiveCharacter : BMovieTuple( [
+    adjectiveCharacter : WeightedTuple( [
         adjectiveCharacterBase, 3,
         adjectiveTexture,       1,
         adjectiveGeographic,    1,
     ] ),
 
-    adjectiveObjectBase : BMovieTuple( (
+    adjectiveObjectBase : WeightedTuple( (
         "Adamantine",
         "All-Powerful",
         "Crosstime",
@@ -404,13 +437,13 @@ wordLists = {
         "Unstoppable",
     ) ),
 
-    adjectiveObject : BMovieTuple( [
+    adjectiveObject : WeightedTuple( [
         adjectiveObjectBase,    2,
         adjectiveTexture,       1,
         adjectiveGeographic,    1,
     ] ),
 
-    adjectivePlaceBase : BMovieTuple( (
+    adjectivePlaceBase : WeightedTuple( (
         "Amazing",
         "Beautiful",
         "Dangerous",
@@ -443,13 +476,13 @@ wordLists = {
         "Wild",
     ) ),
 
-    adjectivePlace : BMovieTuple( [
+    adjectivePlace : WeightedTuple( [
         adjectivePlaceBase,     2,
         adjectiveGeographic,    1,
-        adjectiveTexture
+        adjectiveTexture,       1,
     ] ),
 
-    adjectiveNumber : BMovieTuple( [
+    adjectiveNumber : WeightedTuple( [
         "Two",                  7,
         "Three",                7,
         "Four",                 7,
@@ -471,7 +504,7 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    adverbVerb : BMovieTuple( (
+    adverbVerb : WeightedTuple( (
         "Accidentally",
         "Bravely",
         "Desperately",
@@ -481,7 +514,7 @@ wordLists = {
         "Savagely",
     ) ),
 
-    adverbAdjective : BMovieTuple( (
+    adverbAdjective : WeightedTuple( (
         "Amazingly",
         "Impossibly",
         "Mysteriously",
@@ -496,7 +529,7 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    verbPhrasePresentSingularGoing : BMovieTuple( (
+    verbPhrasePresentSingularGoing : WeightedTuple( (
         "Escapes From",
         "Flies To",
         "Goes To",
@@ -504,14 +537,14 @@ wordLists = {
         "Sails To",
     ) ),
 
-    verbPhrasePresentSingularAttacking : BMovieTuple( (
+    verbPhrasePresentSingularAttacking : WeightedTuple( (
         "Battles",
         "Captures",
         "Declares War On",
         "Destroys",
     ) ),
 
-    verbPhrasePresentSingularFinding : BMovieTuple( [
+    verbPhrasePresentSingularFinding : WeightedTuple( [
         "Discovers",    2,
         "Finds",        2,
         "Seeks",        1,
@@ -519,22 +552,22 @@ wordLists = {
         "Loses",        1,
     ] ),
 
-    verbPhrasePresentSingularPlace : BMovieTuple( [
+    verbPhrasePresentSingularPlace : WeightedTuple( [
         verbPhrasePresentSingularGoing,     2,
         verbPhrasePresentSingularAttacking, 1,
         verbPhrasePresentSingularFinding,   1,
     ] ),
 
-    verbPhrasePresentSingularCharacter : BMovieTuple( (
+    verbPhrasePresentSingularCharacter : WeightedTuple( (
         verbPhrasePresentSingularAttacking,
         verbPhrasePresentSingularFinding,
     ) ),
 
-    verbPhrasePresentSingularObject : BMovieTuple( (
+    verbPhrasePresentSingularObject : WeightedTuple( (
         verbPhrasePresentSingularFinding,
     ) ),
 
-    verbPhrasePresentPluralGoing : BMovieTuple( (
+    verbPhrasePresentPluralGoing : WeightedTuple( (
         "Escape From",
         "Fly To",
         "Go To",
@@ -542,14 +575,14 @@ wordLists = {
         "Sail To",
     ) ),
 
-    verbPhrasePresentPluralAttacking : BMovieTuple( (
+    verbPhrasePresentPluralAttacking : WeightedTuple( (
         "Battle",
         "Capture",
         "Declare War On",
         "Destroy",
     ) ),
 
-    verbPhrasePresentPluralFinding : BMovieTuple( [
+    verbPhrasePresentPluralFinding : WeightedTuple( [
         "Discover", 2,
         "Find",     2,
         "Seek",     1,
@@ -557,31 +590,31 @@ wordLists = {
         "Lose",     2,
     ] ),
 
-    verbPhrasePresentPluralPlace : BMovieTuple ( [
+    verbPhrasePresentPluralPlace : WeightedTuple ( [
         verbPhrasePresentPluralGoing,       2,
         verbPhrasePresentPluralAttacking,   1,
         verbPhrasePresentPluralFinding,     1,
     ] ),
 
-    verbPhrasePresentPluralCharacter : BMovieTuple( (
+    verbPhrasePresentPluralCharacter : WeightedTuple( (
         verbPhrasePresentPluralAttacking,
         verbPhrasePresentPluralFinding,
     ) ),
 
-    verbPhrasePresentPluralObject : BMovieTuple( (
+    verbPhrasePresentPluralObject : WeightedTuple( (
         verbPhrasePresentPluralFinding,
     ) ),
 
-    verbPhrasePastCharacter : BMovieTuple( (
+    verbPhrasePastCharacter : WeightedTuple( (
         verbPhrasePastAttacking,
         verbPhrasePastFinding,
     ) ),
 
-    verbPhrasePastObject : BMovieTuple( (
+    verbPhrasePastObject : WeightedTuple( (
         verbPhrasePastFinding,
     ) ),
 
-    verbPhrasePastGoing : BMovieTuple( (
+    verbPhrasePastGoing : WeightedTuple( (
         "Escaped From",
         "Flew To",
         "Went To",
@@ -589,48 +622,48 @@ wordLists = {
         "Sailed To",
     ) ),
 
-    verbPhrasePastAttacking : BMovieTuple( (
+    verbPhrasePastAttacking : WeightedTuple( (
         "Battled",
         "Captured",
         "Declared War On",
         "Destroyed",
     ) ),
 
-    verbPhrasePastFinding : BMovieTuple( (
+    verbPhrasePastFinding : WeightedTuple( (
         "Discovered",
         "Found",
         "Uncovered",
         "Lost",
     ) ),
 
-    verbPhrasePastPlace : BMovieTuple( [
+    verbPhrasePastPlace : WeightedTuple( [
         verbPhrasePastGoing,        2,
         verbPhrasePastAttacking,    1,
         verbPhrasePastFinding,      1,
     ] ),
 
-    verbPhrasePastCharacter : BMovieTuple( (
+    verbPhrasePastCharacter : WeightedTuple( (
         verbPhrasePastAttacking,
         verbPhrasePastFinding,
     ) ),
 
-    verbPhrasePastObject : BMovieTuple( (
+    verbPhrasePastObject : WeightedTuple( (
         verbPhrasePastFinding,
     ) ),
 
-    verbPhraseFutureCharacter : BMovieTuple( (
+    verbPhraseFutureCharacter : WeightedTuple( (
         [ "Will", verbPhrasePresentSingularCharacter ]
     ) ),
 
-    verbPhraseFutureObject : BMovieTuple( (
+    verbPhraseFutureObject : WeightedTuple( (
         [ "Will", verbPhrasePresentSingularObject ]
     ) ),
 
-    verbPhraseFuturePlace : BMovieTuple( (
+    verbPhraseFuturePlace : WeightedTuple( (
         [ "Will", verbPhrasePresentSingularPlace ]
     ) ),
 
-    verbPhraseGerundCharacter : BMovieTuple( (
+    verbPhraseGerundCharacter : WeightedTuple( (
         "Approaching",
         "Considering",
         "Defying",
@@ -644,7 +677,7 @@ wordLists = {
         "Seeking",
     ) ),
 
-    verbPhraseGerundObject : BMovieTuple( (
+    verbPhraseGerundObject : WeightedTuple( (
         "Discovering",
         "Finding",
         "Looking For",
@@ -653,7 +686,7 @@ wordLists = {
         "Uncovering",
     ) ),
 
-    verbPhraseGerundPlace : BMovieTuple( (
+    verbPhraseGerundPlace : WeightedTuple( (
         "Approaching",
         "Considering",
         "Defying",
@@ -676,7 +709,7 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    namePlaceModifier : BMovieTuple( (
+    namePlaceModifier : WeightedTuple( (
         "Central",
         "Darkest",
         "Deepest",
@@ -693,7 +726,7 @@ wordLists = {
         "Upper",
     ) ),
 
-    namePlaceArchitectureSingular : BMovieTuple( [
+    namePlaceArchitectureSingular : WeightedTuple( [
         "Castle",           2,
         "Cathedral",        1,
         "Dungeon",          1,
@@ -705,7 +738,7 @@ wordLists = {
         "Tower",            2,
     ] ),
 
-    namePlaceArchitecturePlural : BMovieTuple( [
+    namePlaceArchitecturePlural : WeightedTuple( [
         "Castles",          2,
         "Cathedrals",       1,
         "Dungeons",         1,
@@ -714,7 +747,7 @@ wordLists = {
         "Towers",           2,
     ] ),
 
-    namePlaceTerritorySingular : BMovieTuple( (
+    namePlaceTerritorySingular : WeightedTuple( (
         "City",
         "Empire",
         "Kingdom",
@@ -723,7 +756,7 @@ wordLists = {
         "City-State",
     ) ),
 
-    namePlaceTerritoryPlural : BMovieTuple( (
+    namePlaceTerritoryPlural : WeightedTuple( (
         "Cities",
         "Empires",
         "Kingdoms",
@@ -732,7 +765,7 @@ wordLists = {
         "City-States",
     ) ),
 
-    namePlaceGeographySingular : BMovieTuple( (
+    namePlaceGeographySingular : WeightedTuple( (
         "Cave",
         "Cavern",
         "Continent",
@@ -755,7 +788,7 @@ wordLists = {
         "Wasteland",
     ) ),
 
-    namePlaceGeographyPlural : BMovieTuple( (
+    namePlaceGeographyPlural : WeightedTuple( (
         "Caverns",
         "Caves",
         "Deserts",
@@ -773,16 +806,16 @@ wordLists = {
         "Wastelands",
     ) ),
 
-    namePlaceCommon : BMovieTuple( [
+    namePlaceCommon : WeightedTuple( [
         namePlaceArchitecturePlural,    1,
         namePlaceArchitectureSingular,  1,
         namePlaceGeographyPlural,       2,
         namePlaceGeographySingular,     2,
         namePlaceTerritoryPlural,       1,
         namePlaceTerritorySingular,     2,
-    ),
+    ] ),
 
-    namePlaceProper : BMovieTuple( [
+    namePlaceProper : WeightedTuple( [
         namePlaceProperSimple,                                          6,
         [ namePlaceModifier, namePlaceProperSimple ],                   2,
         [ 'The', namePlaceProperArticle ],                              6,
@@ -793,7 +826,7 @@ wordLists = {
         [ 'The', namePlaceCommon, 'of The', namePlaceProperArticle ],   1,
     ] ),
 
-    namePlaceProperSimple : BMovieTuple( (
+    namePlaceProperSimple : WeightedTuple( (
         "Africa",
         "Aldebaran",
         "Altair",
@@ -848,9 +881,9 @@ wordLists = {
         "Venus",
         "Washington",
         "Wongo Wongo",
-     ),
+     ) ),
 
-    namePlaceProperArticle : BMovieTuple( [
+    namePlaceProperArticle : WeightedTuple( [
         "Amazon",                           2,
         "Andes",                            1,
         "Andromeda Galaxy",                 1,
@@ -901,7 +934,8 @@ wordLists = {
         [ "Lost City of", nameConcept ],    1,
         [ "Mountains of", nameConcept ],    1,
         [ "River of", nameConcept ],        1,
-    ),
+    ] ),
+
 
 #//**********************************************************************
 #//
@@ -909,7 +943,7 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    nameHeroSingularLeader : (
+    nameHeroSingularLeader : WeightedTuple( (
         "Abbot",
         "Baron",
         "Bishop",
@@ -984,59 +1018,30 @@ wordLists = {
         "Viscount",
         "Wizard",
         "Wizard",
-    ),
+    ) ),
 
-    nameHeroPluralLeader : (
-        "Barons",
-        "Bishops",
-        "Chieftains",
-        "Chieftains",
-        "Chieftains",
-        "Commanders",
-        "Commanders",
-        "Commanders",
-        "Counts",
-        "Dukes",
-        "Heroes",
-        "Heroes",
-        "Heroes",
-        "Heroes",
-        "Kings",
-        "Kings",
-        "Kings",
-        "Knights",
-        "Knights",
-        "Knights",
-        "Knights",
-        "Lords",
-        "Lords",
-        "Lords",
-        "Masters",
-        "Masters",
-        "Masters",
-        "Priests",
-        "Priests",
-        "Priests",
-        "Princes",
-        "Princes",
-        "Princes",
-        "Prophets",
-        "Prophets",
-        "Prophets",
-        "Queens",
-        "Queens",
-        "Rulers",
-        "Rulers",
-        "Sheiks",
-        "Tyrants",
-        "Tyrants",
-        "Tyrants",
-        "Wizards",
-        "Wizards",
-        "Wizards",
-    ),
+    nameHeroPluralLeader : WeightedTuple( [
+        "Barons",       1,
+        "Bishops",      1,
+        "Chieftains",   3,
+        "Commanders",   3,
+        "Counts",       1,
+        "Dukes",        1,
+        "Heroes",       4,
+        "Kings",        3,
+        "Knights",      4,
+        "Lords",        3,
+        "Masters",      3,
+        "Priests",      3,
+        "Princes",      3,
+        "Prophets",     3,
+        "Queens",       3,
+        "Rulers",       2,
+        "Sheiks",       1,
+        "Wizards",      3,
+    ] ),
 
-    nameHeroSingularCommon : (
+    nameHeroSingularCommon : WeightedTuple( (
         "Alien",
         "Ape",
         "Cat",
@@ -1068,9 +1073,9 @@ wordLists = {
         "Vampire",
         "Villain",
         "Wizard",
-    ),
+    ) ),
 
-    nameHeroSingularProperSimple : (
+    nameHeroSingularProperSimple : WeightedTuple( (
         "Abraham Lincoln",
         "Albert Einstein",
         "Bruce Lee",
@@ -1119,10 +1124,9 @@ wordLists = {
         "The Treehouse Club",
         "Thomas Edison",
         "Tom Servo",
-    ),
+    ) ),
 
-
-    nameHeroPluralCommon : (
+    nameHeroPluralCommon : WeightedTuple( (
         "Aliens",
         "Apes",
         "Barbarians",
@@ -1157,9 +1161,9 @@ wordLists = {
         "Venusians",
         "Vikings",
         "Warriors",
-    ),
+    ) ),
 
-    nameHeroPluralProperSimple : (
+    nameHeroPluralProperSimple : WeightedTuple( (
         "Abbott and Costello",
         "Penn and Teller",
         "The Beatles",
@@ -1169,54 +1173,28 @@ wordLists = {
         "The Space Marines",
         "The Space Rangers",
         "The Three Stooges",
-    ),
+    ) ),
 
-    nameHeroSingularProper : (
-        [ nameHeroSingularProperSimple ],
-        [ nameHeroSingularProperSimple ],
-        [ nameHeroSingularProperSimple ],
-        [ nameHeroSingularProperSimple ],
-        [ nameHeroSingularProperSimple ],
-        [ nameGroupDescription, nameGroupTypePrepend ],
-        [ nameGroupDescription, nameGroupTypePrepend ],
-        [ nameGroupDescription, nameGroupTypePrepend ],
-        [ nameGroupPrepend, nameGroupTypePrepend ],
-        [ nameGroupPrepend, nameGroupTypePrepend ],
-        [ nameGroupPrepend, nameGroupTypePrepend ],
-        [ nameGroupTypeAppend, nameGroupAppend ],
-        [ nameGroupTypeAppend, nameGroupDescription ],
-        [ nameGroupTypeAppend, nameGroupDescription ],
-        [ nameGroupTypeAppend, nameGroupDescription ],
-        [ 'The', nameGroupTypeAppend, 'of', nameConcept ],
-        [ nameConcept, nameGroupTypePrepend ],
-    ),
+    nameHeroSingularProper : WeightedTuple( [
+        [ nameHeroSingularProperSimple ],                   5,
+        [ nameGroupDescription, nameGroupTypePrepend ],     3,
+        [ nameGroupPrepend, nameGroupTypePrepend ],         3,
+        [ nameGroupTypeAppend, nameGroupAppend ],           1,
+        [ nameGroupTypeAppend, nameGroupDescription ],      3,
+        [ 'The', nameGroupTypeAppend, 'of', nameConcept ],  1,
+        [ nameConcept, nameGroupTypePrepend ],              1,
+    ] ),
 
-    nameHeroPluralProper : (
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ nameHeroPluralProperSimple ],
-        [ 'The', adjectiveCharacter, nameHeroPluralCommon ],
-        [ 'The', adjectiveCharacter, nameHeroPluralCommon ],
-        [ 'The', adjectiveCharacter, nameHeroPluralCommon, 'of', nameConcept ],
-        [ 'The', adjectiveCharacterBase, nameHeroPluralCommon ],
-        [ 'The', adjectiveCharacterBase, nameHeroPluralCommon ],
-        [ 'The', adjectiveObject, nameHeroPluralCommon ],
-        [ 'The', adjectiveObject, nameHeroPluralCommon ],
-        [ 'The', adjectiveObject, nameHeroPluralCommon, 'of The', nameDirection ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon ],
-        [ 'The', nameHeroPluralCommon, 'of The', nameDirection ],
-    ),
+    nameHeroPluralProper : WeightedTuple( [
+        [ nameHeroPluralProperSimple ],                                             8,
+        [ 'The', adjectiveCharacter, nameHeroPluralCommon ],                        2,
+        [ 'The', adjectiveCharacter, nameHeroPluralCommon, 'of', nameConcept ],     1,
+        [ 'The', adjectiveCharacterBase, nameHeroPluralCommon ],                    2,
+        [ 'The', adjectiveObject, nameHeroPluralCommon ],                           2,
+        [ 'The', adjectiveObject, nameHeroPluralCommon, 'of The', nameDirection ],  1,
+        [ 'The', nameHeroPluralCommon ],                                            7,
+        [ 'The', nameHeroPluralCommon, 'of The', nameDirection ],                   1,
+    ] ),
 
     nameHeroSingularProperSimplePossessive : makeNameHeroSingularProperSimplePossessive,
     nameHeroPluralProperSimplePossessive : makeNameHeroPluralProperSimplePossessive,
@@ -1228,132 +1206,63 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    nameVillainSingularLeader : (
-        "Abbot",
-        "Baron",
-        "Bishop",
-        "Caliph",
-        "Chieftain",
-        "Chieftain",
-        "Commander",
-        "Commander",
-        "Commander",
-        "Congress",
-        "Count",
-        "Count",
-        "Countess",
-        "Duchess",
-        "Duke",
-        "Duke",
-        "Earl",
-        "Emperor",
-        "Emperor",
-        "Emperor",
-        "Emperor",
-        "Emperoress",
-        "Emperoress",
-        "Hero",
-        "Hero",
-        "Hero",
-        "Hero",
-        "Heroine",
-        "Heroine",
-        "Heroine",
-        "Heroine",
-        "King",
-        "King",
-        "King",
-        "King",
-        "Knight",
-        "Knight",
-        "Knight",
-        "Lord",
-        "Lord",
-        "Lord",
-        "Master",
-        "Master",
-        "Parliament",
-        "Patrician",
-        "Pope",
-        "President",
-        "Priest",
-        "Priest",
-        "Priest",
-        "Prime Minister",
-        "Prince",
-        "Prince",
-        "Prince",
-        "Princess",
-        "Princess",
-        "Princess",
-        "Prophet",
-        "Prophet",
-        "Prophet",
-        "Queen",
-        "Queen",
-        "Queen",
-        "Queen",
-        "Raj",
-        "Ruler",
-        "Ruler",
-        "Sheik",
-        "Tyrant",
-        "Tyrant",
-        "Tyrant",
-        "Viscount",
-        "Wizard",
-        "Wizard",
-    ),
+    nameVillainSingularLeader : WeightedTuple( [
+        "Baron",        1,
+        "Caliph",       1,
+        "Chieftain",    3,
+        "Commander",    3,
+        "Congress",     1,
+        "Count",        2,
+        "Countess",     1,
+        "Duchess",      1,
+        "Duke",         2,
+        "Earl",         1,
+        "Emperor",      6,
+        "Emperess",     4,
+        "King",         4,
+        "Knight",       3,
+        "Lord",         3,
+        "Master",       2,
+        "Parliament",   1,
+        "Patrician",    3,
+        "President",    1,
+        "Priest",       3,
+        "Prince",       3,
+        "Princess",     3,
+        "Prophet",      3,
+        "Queen",        4,
+        "Raj",          1,
+        "Ruler",        2,
+        "Sheik",        1,
+        "Tyrant",       6,
+        "Viscount",     1,
+        "Wizard",       3,
+    ] ),
 
-    nameVillainPluralLeader : (
-        "Barons",
-        "Bishops",
-        "Chieftains",
-        "Chieftains",
-        "Chieftains",
-        "Commanders",
-        "Commanders",
-        "Commanders",
-        "Counts",
-        "Dukes",
-        "Heroes",
-        "Heroes",
-        "Heroes",
-        "Heroes",
-        "Kings",
-        "Kings",
-        "Kings",
-        "Knights",
-        "Knights",
-        "Knights",
-        "Knights",
-        "Lords",
-        "Lords",
-        "Lords",
-        "Masters",
-        "Masters",
-        "Masters",
-        "Priests",
-        "Priests",
-        "Priests",
-        "Princes",
-        "Princes",
-        "Princes",
-        "Prophets",
-        "Prophets",
-        "Prophets",
-        "Queens",
-        "Queens",
-        "Rulers",
-        "Rulers",
-        "Sheiks",
-        "Tyrants",
-        "Tyrants",
-        "Tyrants",
-        "Wizards",
-        "Wizards",
-        "Wizards",
-    ),
+    nameVillainPluralLeader : WeightedTuple( (
+        "Barons",       1,
+        "Bishops",      1,
+        "Chieftains",   3,
+        "Commanders",   3,
+        "Counts",       1,
+        "Dictators",    2,
+        "Dukes",        1,
+        "Emperors",     3,
+        "Emperesses",   1,
+        "Kings",        3,
+        "Knights",      5,
+        "Lords",        3,
+        "Masters",      3,
+        "Priests",      3,
+        "Princes",      3,
+        "Prophets",     3,
+        "Queens",       2,
+        "Rulers",       2,
+        "Sheiks",       1,
+        "Tyrants",      6,
+        "Viziers",      3,
+        "Wizards",      3,
+    ) ),
 
     nameVillainSingularCommon : (
         "Alien",
@@ -1710,94 +1619,80 @@ wordLists = {
         "100",
     ),
 
-    nameConcept : (
-        "Adversity",
-        "Beauty",
-        "Confusion",
-        "Danger",
-        "Danger",
-        "Darkness",
-        "Death",
-        "Deceit",
-        "Defeat",
-        "Desire",
-        "Destiny",
-        "Doom",
-        "Doom",
-        "Enlightenment",
-        "Eternity",
-        "Everything",
-        "Evil",
-        "Evolution",
-        "Fear",
-        "Forever",
-        "Glory",
-        "Gold",
-        "Good",
-        "Gravity",
-        "Hate",
-        "History",
-        "Hope",
-        "Horror",
-        "Infamy",
-        "Infinity",
-        "Infinity",
-        "Life",
-        "Light",
-        "Lore",
-        "Love",
-        "Madness",
-        "Magic",
-        "Magic",
-        "Mystery",
-        "Mystery",
-        "Oblivion",
-        "Oblivion",
-        "Oppression",
-        "Poverty",
-        "Prejudice",
-        "Pride",
-        "Prosperity",
-        "Redemption",
-        "Resurrection",
-        "Revelation",
-        "Righteousness",
-        "Sanity",
-        "Science",
-        "Science",
-        "Space",
-        "Space",
-        "Space",
-        "Spirituality",
-        "Technology",
-        "The Occult",
-        "The Occult",
-        "The Universe",
-        "Terror",
-        "Time",
-        "Triumph",
-        "Truth",
-        "Victory",
-    ),
+    nameConcept : WeightedTuple ( [
+        "Adversity",        1,
+        "Beauty",           1,
+        "Confusion",        1,
+        "Danger",           2,
+        "Darkness",         1,
+        "Death",            1,
+        "Deceit",           1,
+        "Defeat",           1,
+        "Desire",           1,
+        "Destiny",          1,
+        "Doom",             2,
+        "Enlightenment",    1,
+        "Eternity",         1,
+        "Everything",       1,
+        "Evil",             1,
+        "Evolution",        1,
+        "Fear",             1,
+        "Forever",          1,
+        "Glory",            1,
+        "Gold",             1,
+        "Good",             1,
+        "Gravity",          1,
+        "Hate",             1,
+        "History",          1,
+        "Hope",             1,
+        "Horror",           1,
+        "Infamy",           1,
+        "Infinity",         2,
+        "Life",             1,
+        "Light",            1,
+        "Lore",             1,
+        "Love",             1,
+        "Madness",          1,
+        "Magic",            2,
+        "Mystery",          2,
+        "Oblivion",         2,
+        "Oppression",       1,
+        "Poverty",          1,
+        "Prejudice",        1,
+        "Pride",            1,
+        "Prosperity",       1,
+        "Redemption",       1,
+        "Resurrection",     1,
+        "Revelation",       1,
+        "Righteousness",    1,
+        "Sanity",           1,
+        "Science",          2,
+        "Space",            3,
+        "Spirituality",     1,
+        "Technology",       1,
+        "The Occult",       2,
+        "The Universe",     1,
+        "Terror",           1,
+        "Time",             1,
+        "Triumph",          1,
+        "Truth",            1,
+        "Victory",          1,
+    ] ),
 
-    nameDirection : (
-        "Deep South",
-        "East",
-        "East",
-        "Far East",
-        "Far North",
-        "Far West",
-        "Inside",
-        "North",
-        "North",
-        "Outside",
-        "South",
-        "South",
-        "West",
-        "West",
-    ),
+    nameDirection : WeightedTuple( [
+        "Deep South",   1,
+        "East",         2,
+        "Far East",     1,
+        "Far North",    1,
+        "Far West",     1,
+        "Inside",       1,
+        "North",        2,
+        "Outside",      1,
+        "South",        2,
+        "West",         2,
+    ] ),
 
-    nameEventSingular : (
+    nameEventSingular : WeightedTuple( (
         "Abduction",
         "Assassination",
         "Attack",
@@ -1819,84 +1714,52 @@ wordLists = {
         "Triumph",
         "Victory",
         "War",
-    ),
+    ) ),
 
-    nameEventEpoch : (
-        "Century",
-        "Day",
-        "Day",
-        "Day",
-        "Day",
-        "Day",
-        "Day",
-        "Decade",
-        "Eon",
-        "Epoch",
-        "Epoch",
-        "Era",
-        "Era",
-        "Millennium",
-        "Night",
-        "Night",
-        "Night",
-        "Night",
-        "Night",
-        "Night",
-        "Month",
-        "Month",
-        "Time",
-        "Time",
-        "Time",
-        "Time",
-        "Time",
-        "Week",
-        "Week",
-        "Week",
-        "Year",
-        "Year",
-        "Year",
-    ),
+    nameEventEpoch : WeightedTuple ( [
+        "Century",      1,
+        "Day",          6,
+        "Decade",       1,
+        "Eon",          1,
+        "Epoch",        2,
+        "Era",          3,
+        "Millennium",   1,
+        "Night",        6,
+        "Month",        2,
+        "Time",         6,
+        "Week",         3,
+        "Year",         3,
+    ] ),
 
-    nameEventStorySingular : (
-        "Adventure",
-        "Epic",
-        "Fable",
-        "History",
-        "History",
-        "Legend",
-        "Legend",
-        "Legend",
-        "Mystery",
-        "Mystery",
-        "Myth",
-        "Odyssey",
-        "Saga",
-        "Saga",
-        "Song",
-        "Scenario",
-        "Story",
-        "Story",
-        "Tale",
-        "Tale",
-        "Trilogy",
-    ),
+    nameEventStorySingular : WeightedTuple( [
+        "Adventure",    1,
+        "Epic",         1,
+        "Fable",        1,
+        "History",      2,
+        "Legend",       3,
+        "Mystery",      2,
+        "Myth",         1,
+        "Odyssey",      1,
+        "Saga",         2,
+        "Song",         1,
+        "Scenario",     1,
+        "Story",        2,
+        "Tale",         2,
+        "Trilogy",      1,
+    ] ),
 
-    nameEventStoryPlural : (
-        "Adventures",
-        "Adventures",
-        "Fables",
-        "Legends",
-        "Legends",
-        "Mysteries",
-        "Myths",
-        "Songs",
-        "Stories",
-        "Stories",
-        "Tales",
-        "Tales",
-    ),
+    nameEventStoryPlural : WeightedTuple( [
+        "Adventures",   2,
+        "Fables",       1,
+        "Legends",      2,
+        "Mysteries",    1,
+        "Myths",        1,
+        "Songs",        1,
+        "Stories",      2,
+        "Tales",        2,
+    ] ),
 
-    nameEventPlural : (
+    nameEventPlural : WeightedTuple ( (
         "Adventures",
         "Battles",
         "Destruction",
@@ -1911,187 +1774,221 @@ wordLists = {
         "Triumphs",
         "Victories",
         "Wars",
-    ),
+    ) ),
 
-    nameVehicleSingular : (
-        "Battleship",
-        "Fighter Jet",
-        "Hovercraft",
-        "Rocket",
-        "Ship",
-        "Spaceship",
-        "Spaceship",
-        "Starship",
-        "Submarine",
-    ),
+    nameVehicleSingular : WeightedTuple ( [
+        "Battleship",       1,
+        "Fighter Jet",      1,
+        "Flying Saucer",    1,
+        "Hovercraft",       1,
+        "Rocket",           1,
+        "Ship",             1,
+        "Spaceship",        2,
+        "Starship",         2,
+        "Submarine",        1,
+    ] ),
 
-    nameWeaponSingular : (
-        "Bomb",
-        "Cannon",
-        "Laser",
-        "Machine Gun",
-        "Ray Gun",
-        "Ray Gun",
-        "Spear",
-        "Sword",
-        "Sword",
-        "Trident",
-        "Weapon",
-        "Weapon",
-        "Whip",
-    ),
+    nameWeaponSingular : WeightedTuple( [
+        "Bomb",             1,
+        "Cannon",           1,
+        "Laser",            1,
+        "Machine Gun",      1,
+        "Ray Gun",          2,
+        "Spear",            1,
+        "Sword",            2,
+        "Trident",          1,
+        "Weapon",           2,
+        "Whip",             1,
+    ] ),
 
     nameObjectSingularCommon : (
-        (
-            "Android",
-            "Android",
-            "Book",
-            "Clue",
-            "Code",
-            "Codex",
-            "Coffin",
-            "Computer",
-            "Computer",
-            "Mechanoid",
-            "Moon",
-            "Planet",
-            "Robot",
-            "Robot",
-            "Scroll",
-            "Secret",
-            "Secret",
-            "Skull",
-            "Spell",
-            "Star",
-            "Tomb",
-            "Treasure",
-            "Treasure",
-        ),
+        WeightedTuple( [
+            "Android",      2,
+            "Book",         1,
+            "Clue",         1,
+            "Code",         1,
+            "Codex",        1,
+            "Coffin",       1,
+            "Computer",     2,
+            "Mechanoid",    1,
+            "Moon",         1,
+            "Planet",       1,
+            "Robot",        2,
+            "Scroll",       1,
+            "Secret",       2,
+            "Skull",        1,
+            "Spell",        1,
+            "Star",         1,
+            "Tomb",         1,
+            "Treasure",     2,
+        ] ),
         nameVehicleSingular,
         nameWeaponSingular,
     ),
 
-    nameVehiclePlural : (
-        "Battleships",
-        "Fighter Jets",
-        "Rockets",
-        "Ships",
-        "Spaceships",
-        "Spaceships",
-        "Starships",
-        "Submarines",
-        "Tanks",
-    ),
+    nameVehiclePlural : WeightedTuple( [
+        "Battleships",  1,
+        "Fighter Jets", 1,
+        "Rockets",      1,
+        "Ships",        1,
+        "Spaceships",   2,
+        "Starships",    1,
+        "Submarines",   1,
+        "Tanks",        1,
+    ] ),
 
-    nameWeaponPlural : (
-        "Bombs",
-        "Cannons",
-        "Guns",
-        "Lasers",
-        "Machine Guns",
-        "Ray Guns",
-        "Ray Guns",
-        "Spears",
-        "Swords",
-        "Swords",
-        "Tridents",
-        "Weapons",
-        "Weapons",
-    ),
+    nameWeaponPlural : WeightedTuple( [
+        "Bombs",        1,
+        "Cannons",      1,
+        "Guns",         1,
+        "Lasers",       1,
+        "Machine Guns", 1,
+        "Ray Guns",     2,
+        "Spears",       1,
+        "Swords",       2,
+        "Tridents",     1,
+        "Weapons",      2,
+    ] ),
 
-    nameTimeSingular : (
-        "Second",
-        "Minute",
-        "Minute",
-        "Minute",
-        "Hour",
-        "Hour",
-        "Hour",
-        "Day",
-        "Day",
-        "Day",
-        "Day",
-        "Week",
-        "Week",
-        "Month",
-        "Month",
-        "Year",
-        "Year",
-        "Decade",
-        "Century",
-    ),
+    nameTimeSingular : WeightedTuple( [
+        "Second",       1,
+        "Minute",       2,
+        "Hour",         3,
+        "Day",          4,
+        "Week",         2,
+        "Month",        2,
+        "Year",         2,
+        "Decade",       1,
+        "Century",      1,
+    ] ),
 
-    nameTimePlural : (
-        "Seconds",
-        "Minutes",
-        "Minutes",
-        "Minutes",
-        "Hours",
-        "Hours",
-        "Hours",
-        "Days",
-        "Days",
-        "Days",
-        "Days",
-        "Weeks",
-        "Weeks",
-        "Months",
-        "Months",
-        "Years",
-        "Years",
-        "Decades",
-        "Centuries",
-    ),
+    nameTimePlural : WeightedTuple( [
+        "Seconds",      1,
+        "Minutes",      2,
+        "Hours",        3,
+        "Days",         4,
+        "Weeks",        2,
+        "Months",       2,
+        "Years",        2,
+        "Decades",      1,
+        "Centuries",    1,
+    ] ),
 
     nameObjectPluralCommon : (
-        (
-            "Androids",
-            "Computers",
-            "Guns",
-            "Guns",
-            "Gems",
-            "Jewels",
-            "Mysteries",
-            "Mysteries",
-            "Robots",
-            "Secrets",
-            "Treasures",
-        ),
+        WeightedTuple( [
+            "Androids",     1,
+            "Computers",    1,
+            "Guns",         3,
+            "Jewels",       1,
+            "Mysteries",    2,
+            "Robots",       1,
+            "Secrets",      1,
+            "Treasures",    1,
+        ] ),
         nameVehiclePlural,
         nameWeaponPlural,
     ),
 
-    nameObjectProper : (
-        nameObjectProperSimple,
-        nameObjectProperSimple,
-        nameObjectProperSimple,
-        nameObjectProperSimple,
-        nameObjectProperSimple,
-        [ 'The', nameObjectSingularCommon, 'of', ( namePlaceProper, namePlaceProper, namePlaceProper, [ 'The', nameDirection ], nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterPluralProper, nameCharacterPluralProper, nameCharacterPluralProper ) ],
-        [ 'The', nameObjectSingularCommon, 'of', ( namePlaceProper, namePlaceProper, namePlaceProper, [ 'The', nameDirection ], nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterPluralProper, nameCharacterPluralProper, nameCharacterPluralProper ) ],
-        [ 'The', nameWeaponSingular, 'of', ( namePlaceProper, nameConcept, [ 'The', nameDirection ], nameCharacterSingularProper, nameCharacterPluralProper ) ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon ],
-        [ 'The', adverbAdjective, adjectiveObjectBase, nameObjectSingularCommon ],
-        [ 'The', adverbAdjective, adjectiveObjectBase, nameObjectSingularCommon ],
-        [ 'The', adjectiveObject, nameObjectSingularCommon, 'of', ( namePlaceProper, namePlaceProper, namePlaceProper, [ 'The', nameDirection ], nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterPluralProper, nameCharacterPluralProper, nameCharacterPluralProper ) ],
-        [ 'The', adjectiveObject, nameWeaponSingular, 'of', ( namePlaceProper, nameConcept, [ 'The', nameDirection ], nameCharacterSingularProper, nameCharacterPluralProper ) ],
-        [ nameCharacterSingularProperSimplePossessive, nameObjectSingularCommon ],
-        [ nameCharacterSingularProperSimplePossessive, nameObjectSingularCommon ],
-        [ nameCharacterSingularProperSimplePossessive, nameWeaponSingular ],
-        [ nameCharacterSingularProperSimplePossessive, nameConcept ],
-        [ nameCharacterSingularProperSimplePossessive, adjectiveObject, nameObjectSingularCommon ],
-        [ nameCharacterSingularProperSimplePossessive, adjectiveObject, nameObjectSingularCommon ],
-        [ nameCharacterSingularProperSimplePossessive, nameObjectSingularCommon, 'of', nameConcept ],
-        [ nameCharacterSingularProperSimplePossessive, nameObjectSingularCommon, 'of', nameConcept ],
-        [ nameCharacterSingularProperSimplePossessive, adjectiveObject, nameObjectSingularCommon, 'of', nameConcept ],
-    ),
+    nameObjectProper : WeightedTuple( [
+        nameObjectProperSimple,                             5,
+        [
+            'The',
+            nameObjectSingularCommon,
+            'of',
+            WeightedTuple( [
+                namePlaceProper,                3,
+                [ 'The', nameDirection ],       1,
+                nameCharacterSingularProper,    3,
+                nameCharacterPluralProper,      3 ,
+            ] )
+        ],                                                  2,
+        [
+            'The',
+            nameWeaponSingular,
+            'of',
+            (
+                namePlaceProper,
+                nameConcept,
+                [ 'The', nameDirection ],
+                nameCharacterSingularProper,
+                nameCharacterPluralProper
+            )
+        ],                                                  1,
+        [
+            'The',
+            adjectiveObject,
+            nameObjectSingularCommon
+        ],                                                  6,
+        [
+            'The',
+            adverbAdjective,
+            adjectiveObjectBase,
+            nameObjectSingularCommon
+        ],                                                  2,
+        [
+            'The',
+            adjectiveObject,
+            nameObjectSingularCommon,
+            'of',
+            WeightedTuple( [
+                namePlaceProper,                3,
+                [ 'The', nameDirection ],       1,
+                nameCharacterSingularProper,    3,
+                nameCharacterPluralProper,      3,
+            ] ),
+        ],                                                  1,
+        [
+            'The',
+            adjectiveObject,
+            nameWeaponSingular,
+            'of',
+            (
+                namePlaceProper,
+                nameConcept,
+                [ 'The', nameDirection ],
+                nameCharacterSingularProper,
+                nameCharacterPluralProper,
+            )
+        ],                                                  1,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            nameObjectSingularCommon
+        ],                                                  2,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            nameWeaponSingular
+        ],                                                  1,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            nameConcept
+        ],                                                  1,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            adjectiveObject,
+            nameObjectSingularCommon,
+        ],                                                  2,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            nameObjectSingularCommon,
+            'of',
+            nameConcept,
+        ],                                                  2,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            nameObjectSingularCommon,
+            'of',
+            nameConcept
+        ],                                                  1,
+        [
+            nameCharacterSingularProperSimplePossessive,
+            adjectiveObject,
+            nameObjectSingularCommon,
+            'of',
+            nameConcept
+        ],                                                  1,
+    ] ),
 
-    nameObjectProperSimple : (
+    nameObjectProperSimple : WeightedTuple( (
         "Excalibur",
         "The Atomic Bomb",
         "The Holy Grail",
@@ -2102,9 +1999,9 @@ wordLists = {
         "The Enigma Machine",
         "The Voynich Manuscript",
         "The Maltese Falcon",
-    ),
+    ) ),
 
-    namePossessionSingular : (
+    namePossessionSingular : WeightedTuple( (
         "Anger",
         "Betrayal",
         "Bravery",
@@ -2114,6 +2011,7 @@ wordLists = {
         "Desire",
         "Desires",
         "Father",
+        "Fury",
         "Gun",
         "Guns",
         "Intuition",
@@ -2123,18 +2021,17 @@ wordLists = {
         "Sword",
         "Wife",
         "Wrath",
-        "Wrath",
-    ),
+    ) ),
 
-    namePossessionPlural : (
+    namePossessionPlural : WeightedTuple( (
         "Sons",
         "Daughters",
         "Children",
         "Wives",
         "Enemies",
-    ),
+    ) ),
 
-    prepositionalPhraseSingularCommon : (
+    prepositionalPhraseSingularCommon : WeightedTuple( (
         "Above",
         "Against",
         "Beneath",
@@ -2143,30 +2040,26 @@ wordLists = {
         "In",
         "Inside",
         "On",
-    ),
+    ) ),
 
-    prepositionalPhraseEvent : (
+    prepositionalPhraseEvent : WeightedTuple( (
         "After",
         "Before",
-        "During",
-    ),
+        "During"
+    ) ),
 
-    prepositionalPhraseSingularProper : (
-        "Above",
-        "Beneath",
-        "Beyond",
-        "Beyond",
-        "In",
-        "In",
-        "In",
-        "Inside",
-        "Outside of",
-        "On The Outskirts of",
-        "Near",
-        "Near",
-    ),
+    prepositionalPhraseSingularProper : WeightedTuple( [
+        "Above",                    1,
+        "Beneath",                  1,
+        "Beyond",                   2,
+        "In",                       3,
+        "Inside",                   1,
+        "Outside of",               1,
+        "On The Outskirts of",      1,
+        "Near",                     2,
+    ] ),
 
-    prepositionalPhrasePluralCommon : (
+    prepositionalPhrasePluralCommon : WeightedTuple( (
         "Against",
         "Amidst",
         "Among",
@@ -2179,9 +2072,9 @@ wordLists = {
         "Near",
         "Outside",
         "Underneath",
-    ),
+    ) ),
 
-    prepositionalPhrasePluralProper : [
+    prepositionalPhrasePluralProper : WeightedTuple( (
         "Against",
         "Alone In",
         "Amidst",
@@ -2195,7 +2088,7 @@ wordLists = {
         "Near",
         "Outside",
         "Underneath",
-    ],
+    ) ),
 }
 
 
@@ -2224,12 +2117,12 @@ titleTypes = (
     [
         'To',
         verbPhrasePresentPluralObject,
-        ( nameObjectProper, nameObjectProper, nameObjectProper, [ 'The', nameObjectSingularCommon ], [ 'The', nameObjectSingularCommon ], [ 'The', nameObjectSingularCommon ], [ 'The', adjectiveObject, nameObjectSingularCommon ] ),
+        WeightedTuple( [ nameObjectProper, 3, [ 'The', nameObjectSingularCommon ], 3, [ 'The', adjectiveObject, nameObjectSingularCommon ] ] ),
     ],
     [
         ( [ 'The', namePossessionPlural ], [ 'The', namePossessionPlural ], [ 'The', ( adjectiveObject, adjectiveObject, adjectiveCharacter, adjectiveNumber ), namePossessionPlural ] ),
         'of',
-        ( nameCharacterSingularProper, nameCharacterSingularProper, nameCharacterPluralProper, nameCharacterPluralProper, namePlaceProper ),
+        WeightedTuple( [ nameCharacterSingularProper, 2, nameCharacterPluralProper, 2, namePlaceProper ] ),
     ],
     [
         ( [ 'The', nameEventSingular ], [ 'The', nameEventPlural ], [ 'The', ( adjectiveObject, adjectiveObject, adjectiveObject, adjectiveNumber ), nameEventPlural ], [ 'The', adjectiveObject, nameEventSingular ], [ 'The', ( adjectiveObject, adjectiveObject, adjectiveCharacter, adjectiveNumber ), namePossessionPlural ] ),
@@ -2527,18 +2420,18 @@ titleTypes = (
         nameCharacterSingularProper,
         prepositionalPhraseSingularCommon,
         'The',
-        ( adjectivePlace, adjectivePlace, adjectivePlace, [ adverbAdjective, adjectivePlace ] ),
+        WeightedTuple( [ adjectivePlace, 3, [ adverbAdjective, adjectivePlace ], 1 ] ),
         namePlaceCommon,
     ],
     [
         nameHeroSingularCommon,
         ( 'With A', 'Without A' ),
-        ( nameObjectSingularCommon, nameObjectSingularCommon, nameObjectSingularCommon, [ adjectiveObject, nameObjectSingularCommon ] ),
+        WeightedTuple( [ nameObjectSingularCommon, 3, [ adjectiveObject, nameObjectSingularCommon ], 1 ] ),
     ],
     [
         nameHeroPluralCommon,
         ( 'With', 'Without' ),
-        ( nameObjectPluralCommon, nameObjectPluralCommon, nameObjectPluralCommon, [ adjectiveObject, nameObjectPluralCommon ], nameConcept ),
+        WeightedTuple( [ nameObjectPluralCommon, 3, [ adjectiveObject, nameObjectPluralCommon ], 1, nameConcept, 1 ] ),
     ],
     [
         nameHeroSingularProper,
@@ -2574,35 +2467,53 @@ titleTypes = (
         'A',
         nameGroupTypePrepend,
         'of',
-        ( nameHeroPluralCommon, nameHeroPluralCommon, nameVillainPluralCommon, nameVillainPluralCommon, [ adjectiveCharacter, nameHeroPluralCommon ], [ adjectiveCharacter, nameHeroPluralCommon ] ),
+        WeightedTuple( [ nameHeroPluralCommon, 2, nameVillainPluralCommon, 2, [ adjectiveCharacter, nameHeroPluralCommon ], 1, [ adjectiveCharacter, nameVillainPluralCommon ], 1 ] ),
     ],
     [
         'A',
         nameGroupTypePrepend,
         'of',
-        ( nameHeroPluralCommon, nameHeroPluralCommon, nameVillainPluralCommon, nameVillainPluralCommon, [ adjectiveCharacter, nameHeroPluralCommon ], [ adjectiveCharacter, nameHeroPluralCommon ] ),
+        WeightedTuple( [ nameHeroPluralCommon, 1, nameVillainPluralCommon, 2, [ adjectiveCharacter, nameHeroPluralCommon ], 2 ] ),
     ],
     [
         'A',
         nameHeroSingularCommon,
         ( 'of', 'From' ),
-        ( namePlaceProper, namePlaceProper, namePlaceProper, nameConcept ),
+        WeightedTuple( [ namePlaceProper, 3, nameConcept, 1 ] )
     ],
     [
         'A',
         nameHeroSingularCommon,
         ( 'of', 'From' ),
-        ( namePlaceProper, namePlaceProper, namePlaceProper, nameConcept ),
+        WeightedTuple( [ namePlaceProper, 3, nameConcept, 1 ] )
     ],
     [
         'The',
-        ( nameEventPlural, nameEventPlural, namePossessionSingular, namePossessionSingular, namePossessionPlural, [ adjectiveCharacter, namePossessionPlural ], [ adjectiveCharacter, namePossessionPlural ], nameEventPlural, [ adjectiveObject, nameEventPlural ], nameHeroSingularLeader, nameHeroSingularLeader, nameHeroPluralLeader ),
+        WeightedTuple( [
+            nameEventPlural,                                2,
+            namePossessionSingular,                         2,
+            namePossessionPlural,                           1,
+            [ adjectiveCharacter, namePossessionPlural ],   2,
+            nameEventPlural,                                1,
+            [ adjectiveObject, nameEventPlural ],           1,
+            nameHeroSingularLeader,                         2,
+            nameHeroPluralLeader,                           1
+        ] ),
         'of',
         nameHeroSingularProper
     ],
     [
         'The',
-        ( nameEventPlural, nameEventPlural, namePossessionSingular, namePossessionSingular, namePossessionPlural, [ adjectiveCharacter, namePossessionPlural ], [ adjectiveCharacter, namePossessionPlural ], nameEventPlural, [ adjectiveObject, nameEventPlural ], nameHeroSingularLeader, nameHeroSingularLeader, nameHeroPluralLeader ),
+        WeightedTuple( [
+            nameEventPlural,                                2,
+            namePossessionSingular,                         2,
+            namePossessionPlural,                           1,
+            [ adjectiveCharacter, namePossessionPlural ],   2,
+            nameEventPlural,                                1,
+            [ adjectiveObject, nameEventPlural ],           1,
+            nameHeroSingularLeader,                         2,
+            nameHeroPluralLeader,                           1
+        ] ),
         'of',
         nameHeroSingularProper
     ],
@@ -2612,12 +2523,12 @@ titleTypes = (
         namePlaceProper,
     ],
     [
-        ( verbPhraseGerundPlace, verbPhraseGerundPlace, verbPhraseGerundPlace, [ adverbVerb, verbPhraseGerundPlace ] ),
-        ( namePlaceProper, namePlaceProper, namePlaceProper, nameConcept )
+        WeightedTuple( [ verbPhraseGerundPlace, 3, [ adverbVerb, verbPhraseGerundPlace ], 1 ] ),
+        WeightedTuple( [ namePlaceProper, 3, nameConcept, 1 ] )
     ],
     [
-        ( verbPhraseGerundPlace, verbPhraseGerundPlace, verbPhraseGerundPlace, [ adverbVerb, verbPhraseGerundPlace ] ),
-        ( namePlaceProper, namePlaceProper, namePlaceProper, nameConcept )
+        WeightedTuple( [ verbPhraseGerundPlace, 3, [ adverbVerb, verbPhraseGerundPlace ], 1 ] ),
+        WeightedTuple( [ namePlaceProper, 3, nameConcept, 1 ] )
     ],
     [
         ( 'The', 'A' ),
@@ -2732,16 +2643,16 @@ titleTypes = (
         nameCharacterSingularProper,
     ],
     [
-        ( nameEventStorySingular, nameEventStorySingular, nameEventStorySingular, nameEventStorySingular, nameEventStoryPlural, nameEventStoryPlural, [ adjectiveNumber, nameEventStoryPlural ] ),
+        WeightedTuple( [ nameEventStorySingular, 4, nameEventStoryPlural, 2, [ adjectiveNumber, nameEventStoryPlural ] , 1 ] ),
         'of',
         nameConcept,
     ],
     [
         'The',
-        ( nameEventStorySingular, nameEventStorySingular, nameEventStoryPlural ),
+        WeightedTuple( [ nameEventStorySingular, 2, nameEventStoryPlural, 1 ] ),
         'of The',
         adjectivePlace,
-        ( nameEventSingular, nameEventSingular, nameEventPlural ),
+        WeightedTuple( [ nameEventSingular, 2, nameEventPlural, 1 ] ),
     ],
     [
         'The',
@@ -2771,11 +2682,21 @@ titleTypes = (
     ],
     [
         nameCharacterSingularProperSimplePossessive,
-        ( nameObjectSingularCommon, nameObjectSingularCommon, nameObjectSingularCommon, nameObjectPluralCommon, nameObjectPluralCommon, [ adjectiveObject, nameObjectSingularCommon ], [ adjectiveObject, nameObjectPluralCommon ] ),
+        WeightedTuple( [
+            nameObjectSingularCommon,                       3,
+            nameObjectPluralCommon,                         2,
+            [ adjectiveObject, nameObjectSingularCommon ],  1,
+            [ adjectiveObject, nameObjectPluralCommon ],    1,
+        ] ),
     ],
     [
         nameCharacterSingularProperSimplePossessive,
-        ( nameObjectSingularCommon, nameObjectSingularCommon, nameObjectSingularCommon, nameObjectPluralCommon, nameObjectPluralCommon, [ adjectiveObject, nameObjectSingularCommon ], [ adjectiveObject, nameObjectPluralCommon ] ),
+        WeightedTuple( [
+            nameObjectSingularCommon,                       3,
+            nameObjectPluralCommon,                         2,
+            [ adjectiveObject, nameObjectSingularCommon ],  1,
+            [ adjectiveObject, nameObjectPluralCommon ],    1,
+        ] ),
     ],
 )
 
@@ -2789,8 +2710,10 @@ titleTypes = (
 def getWord( wordType ):
     if type( wordType ) is int:
         return getWord( wordLists[ wordType ] )
-    elif type( wordType ) in ( tuple, BMovieTuple ):
+    elif type( wordType ) is tuple:
         return getWord( random.choice( wordType ) )
+    elif type( wordType ) is WeightedTuple:
+        return getWord( wordType.choice( ) )
     elif type( wordType ) is str:
         return wordType
     elif type( wordType ) is list:
@@ -2815,15 +2738,8 @@ def getWord( wordType ):
 def getTitle( ):
     result = getWord( random.choice( titleTypes ) )
 
-    result = result.replace( "A A", "An A" )
-    result = result.replace( "A E", "An E" )
-    result = result.replace( "A I", "An I" )
-    result = result.replace( "A O", "An O" )
-    result = result.replace( "A U", "An U" )
-    result = result.replace( "An Uni", "A Uni" )
-    result = result.replace( "A Hour", "An Hour" )
-    result = result.replace( "In The Edge", "On The Edge" )
-    result = result.replace( " ,", "," )
+    for i in range( 0, len( replaceList ) - 1, 2 ):
+        result = result.replace( replaceList[ i ], replaceList[ i + 1 ] )
 
     return result
 
@@ -2845,8 +2761,7 @@ def main( ):
     count = args.count
 
     for i in range( 0, count ):
-        # print( getTitle( ) )
-        print( getWord( prepositionalPhrasePluralProper ) )
+        print( getTitle( ) )
 
 
 #//**********************************************************************
@@ -2866,7 +2781,7 @@ if __name__ == '__main__':
 #//**********************************************************************
 
 def index( req ):
-    pageTitle = "BMovie 1.2, random B-Movie title generator, by Rick Gutleber, 2012"
+    pageTitle = "BMovie 1.3, random B-Movie title generator, by Rick Gutleber, 2012"
 
     site = siteHeader( pageTitle )
     site += siteBody( pageTitle )
