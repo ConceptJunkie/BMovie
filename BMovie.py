@@ -3,6 +3,7 @@
 import argparse
 import random
 import string
+from reprlib import repr
 
 
 #//**********************************************************************
@@ -11,8 +12,6 @@ import string
 #//
 #//**********************************************************************
 
-class adjective( ) :
-    def __init__( self ):
 adjectiveActionHero                         = 0
 adjectiveActionVillain                      = 1
 adjectiveAge                                = 2
@@ -65,9 +64,6 @@ verbPhrasePastFinding                       = 405
 verbPhraseFutureCharacter                   = 500
 verbPhraseFutureObject                      = 501
 verbPhraseFuturePlace                       = 502
-verbPhraseFutureGoing                       = 503
-verbPhraseFutureAttacking                   = 504
-verbPhraseFutureFinding                     = 505
 
 verbPhraseGerundCharacter                   = 600
 verbPhraseGerundObject                      = 601
@@ -156,6 +152,147 @@ prepositionalPhrasePluralProper             = 1403
 prepositionalPhraseEvent                    = 1404
 
 
+wordTypeDescriptions = {
+    adjectiveActionHero                         : 'adjectiveActionHero',
+    adjectiveActionVillain                      : 'adjectiveActionVillain',
+    adjectiveAge                                : 'adjectiveAge',
+    adjectiveBaseHero                           : 'adjectiveBaseHero',
+    adjectiveBaseVillain                        : 'adjectiveBaseVillain',
+    adjectiveGeographic                         : 'adjectiveGeographic',
+    adjectiveHero                               : 'adjectiveHero',
+    adjectiveHeroNongeographic                  : 'adjectiveHeroNongeographic',
+    adjectiveMentalHero                         : 'adjectiveMentalHero',
+    adjectiveMentalVillain                      : 'adjectiveMentalVillain',
+    adjectiveNumber                             : 'adjectiveNumber',
+    adjectiveObject                             : 'adjectiveObject',
+    adjectiveObjectBase                         : 'adjectiveObjectBase',
+    adjectivePhysicalHero                       : 'adjectivePhysicalHero',
+    adjectivePhysicalVillain                    : 'adjectivePhysicalVillain',
+    adjectivePlace                              : 'adjectivePlace',
+    adjectivePlaceBase                          : 'adjectivePlaceBase',
+    adjectiveTexture                            : 'adjectiveTexture',
+    adjectiveTime                               : 'adjectiveTime',
+    adjectiveVillain                            : 'adjectiveVillain',
+    adjectiveVillainNongeographic               : 'adjectiveVillainNongeographic',
+    adjectiveVocationHero                       : 'adjectiveVocationHero',
+    adjectiveVocationVillain                    : 'adjectiveVocationVillain',
+
+    adverbVerb                                  : 'adverbVerb',
+    adverbAdjective                             : 'adverbAdjective',
+
+    verbPhrasePresentSingularCharacter          : 'verbPhrasePresentSingularCharacter',
+    verbPhrasePresentSingularObject             : 'verbPhrasePresentSingularObject',
+    verbPhrasePresentSingularPlace              : 'verbPhrasePresentSingularPlace',
+    verbPhrasePresentSingularGoing              : 'verbPhrasePresentSingularGoing',
+    verbPhrasePresentSingularAttacking          : 'verbPhrasePresentSingularAttacking',
+    verbPhrasePresentSingularFinding            : 'verbPhrasePresentSingularFinding',
+
+    verbPhrasePresentPluralCharacter            : 'verbPhrasePresentPluralCharacter',
+    verbPhrasePresentPluralObject               : 'verbPhrasePresentPluralObject',
+    verbPhrasePresentPluralPlace                : 'verbPhrasePresentPluralPlace',
+    verbPhrasePresentPluralGoing                : 'verbPhrasePresentPluralGoing',
+    verbPhrasePresentPluralAttacking            : 'verbPhrasePresentPluralAttacking',
+    verbPhrasePresentPluralFinding              : 'verbPhrasePresentPluralFinding',
+
+    verbPhrasePastCharacter                     : 'verbPhrasePastCharacter',
+    verbPhrasePastObject                        : 'verbPhrasePastObject',
+    verbPhrasePastPlace                         : 'verbPhrasePastPlace',
+    verbPhrasePastGoing                         : 'verbPhrasePastGoing',
+    verbPhrasePastAttacking                     : 'verbPhrasePastAttacking',
+    verbPhrasePastFinding                       : 'verbPhrasePastFinding',
+
+    verbPhraseFutureCharacter                   : 'verbPhraseFutureCharacter',
+    verbPhraseFutureObject                      : 'verbPhraseFutureObject',
+    verbPhraseFuturePlace                       : 'verbPhraseFuturePlace',
+
+    verbPhraseGerundCharacter                   : 'verbPhraseGerundCharacter',
+    verbPhraseGerundObject                      : 'verbPhraseGerundObject',
+    verbPhraseGerundPlace                       : 'verbPhraseGerundPlace',
+
+    namePlaceCommon                             : 'namePlaceCommon',
+    namePlaceProper                             : 'namePlaceProper',
+    namePlaceProperSimple                       : 'namePlaceProperSimple',
+    namePlaceProperArticle                      : 'namePlaceProperArticle',
+    namePlaceArchitectureSingular               : 'namePlaceArchitectureSingular',
+    namePlaceArchitecturePlural                 : 'namePlaceArchitecturePlural',
+    namePlaceGeographySingular                  : 'namePlaceGeographySingular',
+    namePlaceGeographyPlural                    : 'namePlaceGeographyPlural',
+    namePlaceTerritorySingular                  : 'namePlaceTerritorySingular',
+    namePlaceTerritoryPlural                    : 'namePlaceTerritoryPlural',
+
+    nameHeroSingularCommon                      : 'nameHeroSingularCommon',
+    nameHeroSingularProper                      : 'nameHeroSingularProper',
+    nameHeroSingularProperSimple                : 'nameHeroSingularProperSimple',
+    nameHeroSingularProperSimplePossessive      : 'nameHeroSingularProperSimplePossessive',
+    nameHeroSingularLeader                      : 'nameHeroSingularLeader',
+    nameHeroPluralLeader                        : 'nameHeroPluralLeader',
+    nameHeroPluralCommon                        : 'nameHeroPluralCommon',
+    nameHeroPluralGeographicCommon              : 'nameHeroPluralGeographicCommon',
+    nameHeroPluralProper                        : 'nameHeroPluralProper',
+    nameHeroPluralProperSimple                  : 'nameHeroPluralProperSimple',
+    nameHeroPluralProperSimplePossessive        : 'nameHeroPluralProperSimplePossessive',
+
+    nameVillainSingularCommon                   : 'nameVillainSingularCommon',
+    nameVillainSingularProper                   : 'nameVillainSingularProper',
+    nameVillainSingularProperSimple             : 'nameVillainSingularProperSimple',
+    nameVillainSingularProperSimplePossessive   : 'nameVillainSingularProperSimplePossessive',
+    nameVillainSingularLeader                   : 'nameVillainSingularLeader',
+    nameVillainPluralLeader                     : 'nameVillainPluralLeader',
+    nameVillainPluralCommon                     : 'nameVillainPluralCommon',
+    nameVillainPluralGeographicCommon           : 'nameVillainPluralGeographicCommon',
+    nameVillainPluralProper                     : 'nameVillainPluralProper',
+    nameVillainPluralProperSimple               : 'nameVillainPluralProperSimple',
+    nameVillainPluralProperSimplePossessive     : 'nameVillainPluralProperSimplePossessive',
+
+    nameGroupDescription                        : 'nameGroupDescription',
+    nameGroupTypePrepend                        : 'nameGroupTypePrepend',
+    nameGroupTypeAppend                         : 'nameGroupTypeAppend',
+    nameGroupPrepend                            : 'nameGroupPrepend',
+    nameGroupAppend                             : 'nameGroupAppend',
+
+    nameAnimalPlural                            : 'nameAnimalPlural',
+    nameAnimalSingular                          : 'nameAnimalSingular',
+    nameConcept                                 : 'nameConcept',
+    nameConceptNegative                         : 'nameConceptNegative',
+    nameConceptPositive                         : 'nameConceptPositive',
+    nameConceptNeutral                          : 'nameConceptNeutral',
+    nameDirection                               : 'nameDirection',
+    nameEventEpoch                              : 'nameEventEpoch',
+    nameEventPlural                             : 'nameEventPlural',
+    nameEventSingular                           : 'nameEventSingular',
+    nameEventStoryPlural                        : 'nameEventStoryPlural',
+    nameEventStorySingular                      : 'nameEventStorySingular',
+    nameModifier                                : 'nameModifier',
+    namePlaceModifier                           : 'namePlaceModifier',
+    nameTimePlural                              : 'nameTimePlural',
+    nameTimeSingular                            : 'nameTimeSingular',
+    nameVehiclePlural                           : 'nameVehiclePlural',
+    nameVehicleSingular                         : 'nameVehicleSingular',
+    nameTitleHero                               : 'nameTitleHero',
+    nameTitleVillain                            : 'nameTitleVillain',
+    nameWeaponPlural                            : 'nameWeaponPlural',
+    nameWeaponSingular                          : 'nameWeaponSingular',
+
+    nameObjectPluralCommon                      : 'nameObjectPluralCommon',
+    nameObjectPluralCommon1                     : 'nameObjectPluralCommon1',
+    nameObjectProper                            : 'nameObjectProper',
+    nameObjectProperSimple                      : 'nameObjectProperSimple',
+    nameObjectSingularCommon                    : 'nameObjectSingularCommon',
+    nameObjectSingularCommon1                   : 'nameObjectSingularCommon1',
+
+    namePossessionHeroSingular                  : 'namePossessionHeroSingular',
+    namePossessionVillainSingular               : 'namePossessionVillainSingular',
+    namePossessionHeroPlural                    : 'namePossessionHeroPlural',
+    namePossessionVillainPlural                 : 'namePossessionVillainPlural',
+
+    prepositionalPhraseSingularCommon           : 'prepositionalPhraseSingularCommon',
+    prepositionalPhraseSingularProper           : 'prepositionalPhraseSingularProper',
+    prepositionalPhrasePluralCommon             : 'prepositionalPhrasePluralCommon',
+    prepositionalPhrasePluralProper             : 'prepositionalPhrasePluralProper',
+    prepositionalPhraseEvent                    : 'prepositionalPhraseEvent',
+}
+
+
 #//**********************************************************************
 #//
 #//  replaceList
@@ -196,11 +333,10 @@ replaceList = [
 class WeightedTuple( object ):
     def __init__( self, values ):
         if type( values ) is list:
+            self.weighted = True
             self.values = [ ]
 
             for i in range( 0, len( values ) - 1, 2 ):
-                # print( values[ i ] )
-                # print( values[ i + 1 ] )
                 self.values.extend( [ values[ i ] ] * values[ i + 1 ] )
 
             if len( values ) > 4:
@@ -211,7 +347,8 @@ class WeightedTuple( object ):
                 self.maxHistory = 0
 
         elif type( values ) is tuple:
-            self.values = values
+            self.weighted = False
+            self.values = list( values )
 
             if len( self.values ) > 2:
                 self.maxHistory = int( len( self.values ) / 2 ) + 1
@@ -223,7 +360,6 @@ class WeightedTuple( object ):
         self.mru = list( )
 
     def choice( self ):
-        # print( self.values )
         while True:
             result = random.choice( self.values )
 
@@ -242,6 +378,57 @@ class WeightedTuple( object ):
 
     def __getitem__( self, key ):
         return self.values[ key ]
+
+    def __repr__( self ):
+        return self.repr( self )
+
+    def repr( self, target ):
+        try:
+            if target.weighted:
+                result = 'WeightedTuple( '
+                oldValue = ''
+                repeat = 1
+
+                result += '['
+            else:
+                result += '('
+
+            for i in target:
+                if self.weighted:
+                    if i == oldValue:
+                        repeat += 1
+                    else:
+                        result += self.repr( i ) + ',' + str( repeat ) + ','
+                else:
+                    result += self.repr( i ) + ','
+
+            if self.weighted:
+                result += self.repr( i ) + ',' + str( repeat ) + ', ] )'
+            else:
+                result += ') )'
+        except AttributeError:
+            try:
+                isTuple = isinstance( target, tuple )
+
+                if isTuple:
+                    result = '('
+                else:
+                    result = '['
+
+                for i in target:
+                    result += self.repr( i ) + ','
+
+                if isTuple:
+                    result += ')'
+                else:
+                    result += ']'
+            except TypeError:
+#                try:
+                    result = wordTypeDescriptions[ target ]
+#                except KeyError:
+#                    result += target
+
+        return result
 
 
 #//**********************************************************************
@@ -488,13 +675,14 @@ wordLists = {
         "Yellow",       1,
     ] ),
 
-    adjectiveTime : WeightedTuple( (
-        "Ancient",
-        "Eternal",
-        "Never-Ending",
-        "Prehistoric",
-        "Unending",
-    ) ),
+    adjectiveTime : WeightedTuple( [
+        "Ancient",      1,
+        "Atom-Age",     1,
+        "Eternal",      1,
+        "Never-Ending", 1,
+        "Prehistoric",  1,
+        "Unending",     1,
+    ] ),
 
     adjectiveMentalHero : WeightedTuple( [
         "Angry",        1,
@@ -554,40 +742,40 @@ wordLists = {
     ] ),
 
     adjectivePhysicalHero : WeightedTuple( [
-        "Beautiful",            1,
-        "Cybernetic",           1,
-        "Mutant",               1,
-        "Radioactive",          1,
+        "Beautiful",    1,
+        "Cybernetic",   1,
+        "Mutant",       1,
+        "Radioactive",  1,
     ] ),
 
     adjectivePhysicalVillain : WeightedTuple( [
-        "50-Foot",              1,
-        "Colossal",             1,
-        "Cybernetic",           2,
-        "Decomposing",          1,
-        "Ectoplasmic",          1,
-        "Exploding",            1,
-        "Fanged",               1,
-        "Giant",                1,
-        "Gigantic",             2,
-        "Invisible",            1,
-        "Monstrous",            1,
-        "Mutant",               2,
-        "Poisonous",            1,
-        "Radioactive",          2,
-        "Shriveled",            1,
-        "Shrunken",             1,
-        "Slimy",                1,
-        "Venemous",             1,
+        "50-Foot",      1,
+        "Colossal",     1,
+        "Cybernetic",   2,
+        "Decomposing",  1,
+        "Ectoplasmic",  1,
+        "Exploding",    1,
+        "Fanged",       1,
+        "Giant",        1,
+        "Gigantic",     2,
+        "Invisible",    1,
+        "Monstrous",    1,
+        "Mutant",       2,
+        "Poisonous",    1,
+        "Radioactive",  2,
+        "Shriveled",    1,
+        "Shrunken",     1,
+        "Slimy",        1,
+        "Venemous",     1,
     ] ),
 
     adjectiveVocationHero : WeightedTuple( [
-        "Ninja",                1,
+        "Ninja",        1,
     ] ),
 
     adjectiveVocationVillain : WeightedTuple( [
-        "Ninja",                1,
-        "Pirate",               1,
+        "Ninja",        1,
+        "Pirate",       1,
     ] ),
 
     adjectiveActionHero : WeightedTuple( [
@@ -602,6 +790,7 @@ wordLists = {
     ] ),
 
     adjectiveActionVillain : WeightedTuple( [
+        "Blood-Sucking",        1,
         "Brain-Eating",         1,
         "Dimension-Hopping",    1,
         "Horrifying",           1,
@@ -620,12 +809,12 @@ wordLists = {
     ] ),
 
     adjectiveAge : WeightedTuple( [
-        "Baby",                 1,
-        "Kid",                  1,
-        "Teenage",              3,
-        "Elderly",              3,
-        "Decrepit",             1,
-        "Ancient",              3,
+        "Baby",         1,
+        "Kid",          1,
+        "Teenage",      3,
+        "Elderly",      3,
+        "Decrepit",     1,
+        "Ancient",      3,
     ] ),
 
     adjectiveBaseHero : WeightedTuple( [
@@ -1035,23 +1224,23 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    adverbVerb : WeightedTuple( (
-        "Accidentally",
-        "Bravely",
-        "Desperately",
-        "Foolishly",
-        "Furiously",
-        "Mysteriously",
-        "Savagely",
-    ) ),
+    adverbVerb : WeightedTuple( [
+        "Accidentally",     1,
+        "Bravely",          1,
+        "Desperately",      1,
+        "Foolishly",        1,
+        "Furiously",        1,
+        "Mysteriously",     1,
+        "Savagely",         1,
+    ] ),
 
-    adverbAdjective : WeightedTuple( (
-        "Amazingly",
-        "Impossibly",
-        "Mysteriously",
-        "Surprisingly",
-        "Unbelievably",
-    ) ),
+    adverbAdjective : WeightedTuple( [
+        "Amazingly",        1,
+        "Impossibly",       1,
+        "Mysteriously",     1,
+        "Surprisingly",     1,
+        "Unbelievably",     1,
+    ] ),
 
 
 #//**********************************************************************
@@ -1094,9 +1283,9 @@ wordLists = {
         verbPhrasePresentSingularFinding,
     ) ),
 
-    verbPhrasePresentSingularObject : WeightedTuple( (
-        verbPhrasePresentSingularFinding,
-    ) ),
+    verbPhrasePresentSingularObject : WeightedTuple( [
+        verbPhrasePresentSingularFinding,   1
+    ] ),
 
     verbPhrasePresentPluralGoing : WeightedTuple( (
         "Escape From",
@@ -1181,21 +1370,21 @@ wordLists = {
         verbPhrasePastFinding,
     ) ),
 
-    verbPhrasePastObject : WeightedTuple( (
-        verbPhrasePastFinding,
-    ) ),
+    verbPhrasePastObject : WeightedTuple( [
+        verbPhrasePastFinding,  1,
+    ] ),
 
-    verbPhraseFutureCharacter : WeightedTuple( (
-        [ "Will", verbPhrasePresentSingularCharacter ]
-    ) ),
+    verbPhraseFutureCharacter : WeightedTuple( [
+        [ "Will", verbPhrasePresentSingularCharacter ], 1 ,
+    ] ),
 
-    verbPhraseFutureObject : WeightedTuple( (
-        [ "Will", verbPhrasePresentSingularObject ]
-    ) ),
+    verbPhraseFutureObject : WeightedTuple( [
+        [ "Will", verbPhrasePresentSingularObject ],    1,
+    ] ),
 
-    verbPhraseFuturePlace : WeightedTuple( (
-        [ "Will", verbPhrasePresentSingularPlace ]
-    ) ),
+    verbPhraseFuturePlace : WeightedTuple( [
+        [ "Will", verbPhrasePresentSingularPlace ],     1,
+    ] ),
 
     verbPhraseGerundCharacter : WeightedTuple( (
         "Approaching",
@@ -1901,6 +2090,21 @@ wordLists = {
         "The Sheriff of Nottingham",
     ) ),
 
+    nameVillainPluralGeographicCommon : WeightedTuple( (
+        "Earthlings",
+        "Jovians",
+        "Lunarians",
+        "Martians",
+        "Mecurians",
+        "Neptunians",
+        "Plutonians",
+        "Saturnians",
+        "Terrans",
+        "Titanians",
+        "Uranians",
+        "Venusians",
+    ) ),
+
     nameVillainPluralCommon : WeightedTuple( [
         "Aliens",                               1,
         "Assassins",                            1,
@@ -2098,7 +2302,7 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    nameGroupTypePrepend : (
+    nameGroupTypePrepend : WeightedTuple( (
         "Batallion",
         "Company",
         "Corps",
@@ -2112,9 +2316,9 @@ wordLists = {
         "Squadron",
         "Troop",
         "Unit",
-     ),
+     ) ),
 
-    nameGroupTypeAppend : (
+    nameGroupTypeAppend : WeightedTuple( (
         "Batallion",
         "Company",
         "Department",
@@ -2125,9 +2329,9 @@ wordLists = {
         "Squadron",
         "Team",
         "Unit",
-     ),
+     ) ),
 
-    nameGroupDescription : (
+    nameGroupDescription : WeightedTuple( (
         "Alpha",
         "Beta",
         "Delta",
@@ -2144,124 +2348,101 @@ wordLists = {
         "Upsilon",
         "Zero",
         "Zeta",
-    ),
+    ) ),
 
-    nameGroupPrepend : (
-        "11th",
-        "13th",
-        "17th",
-        "19th",
-        "23rd",
-        "29th",
-        "31st",
-        "37th",
-        "41st",
-        "43rd",
-        "47th",
-        "49th",
-        "50th",
-        "53rd",
-        "59th",
-        "61st",
-        "67th",
-        "6th",
-        "71st",
-        "73rd",
-        "79th",
-        "7th",
-        "83rd",
-        "8th",
-        "99th",
-        "9th",
-        "A",
-        "B",
-        "C",
-        "Danger",
-        "Danger",
-        "Eagle",
-        "Eagle",
-        "F",
-        "Fifth",
-        "First",
-        "First",
-        "First",
-        "Fourth",
-        "Giga",
-        "J",
-        "K",
-        "Mega",
-        "Q",
-        "Second",
-        "Second",
-        "Space",
-        "Space",
-        "Space",
-        "Super",
-        "Third",
-        "Third",
-        "Tiger",
-        "Tiger",
-        "Ultra",
-        "V",
-        "W",
-        "X",
-        "Z",
-    ),
+    nameGroupPrepend : WeightedTuple( [
+        "11th",     1,
+        "13th",     1,
+        "17th",     1,
+        "19th",     1,
+        "23rd",     1,
+        "29th",     1,
+        "31st",     1,
+        "37th",     1,
+        "41st",     1,
+        "43rd",     1,
+        "47th",     1,
+        "49th",     1,
+        "50th",     1,
+        "53rd",     1,
+        "59th",     1,
+        "61st",     1,
+        "67th",     1,
+        "6th",      1,
+        "71st",     1,
+        "73rd",     1,
+        "79th",     1,
+        "7th",      1,
+        "83rd",     1,
+        "8th",      1,
+        "99th",     1,
+        "9th",      1,
+        "A",        1,
+        "B",        1,
+        "C",        1,
+        "Danger",   2,
+        "Eagle",    2,
+        "F",        1,
+        "Fifth",    1,
+        "First",    3,
+        "Fourth",   1,
+        "Giga",     1,
+        "J",        1,
+        "K",        1,
+        "Mega",     1,
+        "Q",        1,
+        "Second",   2,
+        "Space",    3,
+        "Super",    1,
+        "Third",    2,
+        "Tiger",    2,
+        "Ultra",    1,
+        "V",        1,
+        "W",        1,
+        "X",        1,
+        "Z",        1,
+    ] ),
 
-    nameGroupAppend : (
-        "One",
-        "One",
-        "One",
-        "One",
-        "Two",
-        "Two",
-        "Two",
-        "Two",
-        "Three",
-        "Three",
-        "Three",
-        "Three",
-        "Seven",
-        "Seven",
-        "Seven",
-        "Seven",
-        "Nine",
-        "Nine",
-        "Nine",
-        "Nine",
-        "Ten",
-        "Ten",
-        "Ten",
-        "Ten",
-        "13",
-        "17",
-        "19",
-        "23",
-        "29",
-        "31",
-        "37",
-        "41",
-        "43",
-        "47",
-        "49",
-        "50",
-        "53",
-        "59",
-        "61",
-        "67",
-        "71",
-        "73",
-        "79",
-        "83",
-        "99",
-        "100",
-    ),
+    nameGroupAppend : WeightedTuple( [
+        "One",      2,
+        "Two",      2,
+        "Three",    2,
+        "Four",     2,
+        "Five",     2,
+        "Six",      2,
+        "Seven",    2,
+        "Eight",    2,
+        "Nine",     2,
+        "Ten",      2,
+        "13",       1,
+        "17",       1,
+        "19",       1,
+        "23",       1,
+        "29",       1,
+        "31",       1,
+        "37",       1,
+        "41",       1,
+        "43",       1,
+        "47",       1,
+        "49",       1,
+        "50",       1,
+        "53",       1,
+        "59",       1,
+        "61",       1,
+        "67",       1,
+        "71",       1,
+        "73",       1,
+        "79",       1,
+        "83",       1,
+        "99",       1,
+        "100",      1,
+    ] ),
 
-    nameConcept : (
+    nameConcept : WeightedTuple( (
         nameConceptPositive,
         nameConceptNeutral,
         nameConceptNegative,
-    ),
+    ) ),
 
 #//**********************************************************************
 #//
@@ -2361,39 +2542,45 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    nameEventSingular : WeightedTuple( (
-        "Abduction",
-        "Assassination",
-        "Attack",
-        "Battle",
-        "Case",
-        "Conquest",
-        "Curse",
-        "Dance",
-        "Day",
-        "Destiny",
-        "Destruction",
-        "Disappearance",
-        "Downfall",
-        "Feast",
-        "Game",
-        "Invasion",
-        "Journey",
-        "Liberation",
-        "Murder",
-        "Night",
-        "Peril",
-        "Redemption",
-        "Return",
-        "Revenge",
-        "Storm",
-        "Tempest",
-        "Tragedy",
-        "Trial",
-        "Triumph",
-        "Victory",
-        "War",
-    ) ),
+    nameEventSingular : WeightedTuple( [
+        "Abduction",        1,
+        "Assassination",    1,
+        "Attack",           2,
+        "Battle",           2,
+        "Case",             1,
+        "Conquest",         2,
+        "Conspiracy",       2,
+        "Curse",            2,
+        "Dance",            1,
+        "Day",              3,
+        "Debacle",          1,
+        "Destiny",          2,
+        "Destruction",      2,
+        "Disappearance",    2,
+        "Disaster",         2,
+        "Downfall",         2,
+        "Feast",            1,
+        "Fall",             2,
+        "Game",             1,
+        "Invasion",         3,
+        "Journey",          3,
+        "Liberation",       1,
+        "Murder",           1,
+        "Night",            2,
+        "Peril",            1,
+        "Rise",             1,
+        "Redemption",       1,
+        "Return",           2,
+        "Revenge",          2,
+        "Storm",            1,
+        "Tempest",          1,
+        "Tragedy",          1,
+        "Trial",            1,
+        "Tribulation",      1,
+        "Triumph",          2,
+        "Victory",          2,
+        "War",              2,
+    ] ),
 
     nameEventEpoch : WeightedTuple ( [
         "Century",          1,
@@ -2408,6 +2595,10 @@ wordLists = {
         "Time",             6,
         "Week",             3,
         "Year",             3,
+        "Summer",           1,
+        "Winter",           1,
+        "Springtime",       1,
+        "Autumn",           1,
     ] ),
 
     nameEventStorySingular : WeightedTuple( [
@@ -2858,7 +3049,7 @@ wordLists = {
 
 titleTypes = WeightedTuple( [
     [
-        "Assignment: ",
+        'Assignment:',
         WeightedTuple( [
             namePlaceProper,        6,
             nameConceptPositive,    1,
@@ -2866,7 +3057,7 @@ titleTypes = WeightedTuple( [
         ] ),
     ], 1,
     [
-        Destination,
+        'Destination',
         WeightedTuple( [
             namePlaceProper,        6,
             nameConceptPositive,    1,
@@ -3510,6 +3701,9 @@ def getWord( wordType ):
 #//**********************************************************************
 
 def getTitle( ):
+    titleType = random.choice( titleTypes )
+    print( titleType )
+
     result = getWord( random.choice( titleTypes ) )
 
     for i in range( 0, len( replaceList ) - 1, 2 ):
@@ -3525,6 +3719,9 @@ def getTitle( ):
 #//**********************************************************************
 
 def main( ):
+
+    print( wordTypeDescriptions[ adjectiveActionHero ] )
+
     parser = argparse.ArgumentParser( prog='BMovie' )
 
     parser.add_argument( '-n', '--count', type=int, action='store', default=1 )
@@ -3536,6 +3733,13 @@ def main( ):
 
     for i in range( 0, count ):
         print( getTitle( ) )
+
+    if args.stats:
+        for i in wordTypeDescriptions.keys( ):
+            print( )
+            print(  wordTypeDescriptions[ i ] + ":" );
+            print( )
+            print( wordLists[ i ] )
 
 
 #//**********************************************************************
@@ -3555,7 +3759,7 @@ if __name__ == '__main__':
 #//**********************************************************************
 
 def index( req ):
-    pageTitle = "BMovie 0.4.1, random B-Movie title generator, by Rick Gutleber, 2012"
+    pageTitle = "BMovie 0.4.3, random B-Movie title generator, by Rick Gutleber, 2012"
 
     site = siteHeader( pageTitle )
     site += siteBody( pageTitle )
