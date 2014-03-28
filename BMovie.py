@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-import argparse
+# import argparse
 import random
 import string
-from reprlib import repr
+# from reprlib import repr
+
+# enable debugging
+import cgitb
+cgitb.enable( )
 
 
 #//**********************************************************************
@@ -92,17 +96,19 @@ nameHeroPluralProper                        = 808
 nameHeroPluralProperSimple                  = 809
 nameHeroPluralProperSimplePossessive        = 810
 
-nameVillainSingularCommon                   = 900
-nameVillainSingularProper                   = 901
-nameVillainSingularProperSimple             = 902
-nameVillainSingularProperSimplePossessive   = 903
-nameVillainSingularLeader                   = 904
-nameVillainPluralLeader                     = 905
-nameVillainPluralCommon                     = 906
-nameVillainPluralGeographicCommon           = 907
-nameVillainPluralProper                     = 908
-nameVillainPluralProperSimple               = 909
-nameVillainPluralProperSimplePossessive     = 910
+nameVillainGeneric                          = 900
+nameVillainSingularCommon                   = 901
+nameVillainSingularGeneric                  = 902
+nameVillainSingularProper                   = 903
+nameVillainSingularProperSimple             = 904
+nameVillainSingularProperSimplePossessive   = 905
+nameVillainSingularLeader                   = 906
+nameVillainPluralLeader                     = 907
+nameVillainPluralCommon                     = 908
+nameVillainPluralGeographicCommon           = 909
+nameVillainPluralProper                     = 910
+nameVillainPluralProperSimple               = 911
+nameVillainPluralProperSimplePossessive     = 912
 
 nameGroupDescription                        = 1000
 nameGroupTypePrepend                        = 1001
@@ -120,18 +126,21 @@ nameDirection                               = 1106
 nameEventEpoch                              = 1107
 nameEventPlural                             = 1108
 nameEventSingular                           = 1109
-nameEventStoryPlural                        = 1110
-nameEventStorySingular                      = 1111
-nameModifier                                = 1112
-namePlaceModifier                           = 1113
-nameTimePlural                              = 1114
-nameTimeSingular                            = 1115
-nameVehiclePlural                           = 1116
-nameVehicleSingular                         = 1117
-nameTitleHero                               = 1118
-nameTitleVillain                            = 1119
-nameWeaponPlural                            = 1120
-nameWeaponSingular                          = 1121
+nameEventSingularNeutral                    = 1110
+nameEventSingularPositive                   = 1111
+nameEventSingularNegative                   = 1112
+nameEventStoryPlural                        = 1113
+nameEventStorySingular                      = 1114
+nameModifier                                = 1115
+namePlaceModifier                           = 1116
+nameTimePlural                              = 1117
+nameTimeSingular                            = 1118
+nameVehiclePlural                           = 1119
+nameVehicleSingular                         = 1120
+nameTitleHero                               = 1121
+nameTitleVillain                            = 1122
+nameWeaponPlural                            = 1123
+nameWeaponSingular                          = 1124
 
 nameObjectPluralCommon                      = 1200
 nameObjectPluralCommon1                     = 1201
@@ -232,7 +241,9 @@ wordTypeDescriptions = {
     nameHeroPluralProperSimple                  : 'nameHeroPluralProperSimple',
     nameHeroPluralProperSimplePossessive        : 'nameHeroPluralProperSimplePossessive',
 
+    nameVillainGeneric                          : 'nameVillainGeneric',
     nameVillainSingularCommon                   : 'nameVillainSingularCommon',
+    nameVillainSingularGeneric                  : 'nameVillainSingularGeneric',
     nameVillainSingularProper                   : 'nameVillainSingularProper',
     nameVillainSingularProperSimple             : 'nameVillainSingularProperSimple',
     nameVillainSingularProperSimplePossessive   : 'nameVillainSingularProperSimplePossessive',
@@ -260,6 +271,9 @@ wordTypeDescriptions = {
     nameEventEpoch                              : 'nameEventEpoch',
     nameEventPlural                             : 'nameEventPlural',
     nameEventSingular                           : 'nameEventSingular',
+    nameEventSingularNeutral                    : 'nameEventSingularNeutral',
+    nameEventSingularPositive                   : 'nameEventSingularPositive',
+    nameEventSingularNegative                   : 'nameEventSingularNegative',
     nameEventStoryPlural                        : 'nameEventStoryPlural',
     nameEventStorySingular                      : 'nameEventStorySingular',
     nameModifier                                : 'nameModifier',
@@ -345,7 +359,6 @@ class WeightedTuple( object ):
                 self.maxHistory = 1
             else:
                 self.maxHistory = 0
-
         elif type( values ) is tuple:
             self.weighted = False
             self.values = list( values )
@@ -383,50 +396,64 @@ class WeightedTuple( object ):
         return self.repr( self )
 
     def repr( self, target ):
-        try:
-            if target.weighted:
-                result = 'WeightedTuple( '
-                oldValue = ''
-                repeat = 1
+        #print( 'type: ', end='' )
+        #print( type( target ) )
+        if type( target ) is WeightedTuple:
+            result = 'WeightedTuple('
 
-                result += '['
+            if target.weighted:
+                result += self.weighted_repr( target.values )
             else:
-                result += '('
+                result += self.repr( target.values )
+
+            result += ')'
+        elif type( target ) is str:
+            result = "'" + target + "'"
+        elif type( target ) is int:
+            result = wordTypeDescriptions[ target ]
+        elif isinstance( target, tuple ):
+            result = '('
 
             for i in target:
-                if self.weighted:
-                    if i == oldValue:
-                        repeat += 1
-                    else:
-                        result += self.repr( i ) + ',' + str( repeat ) + ','
-                else:
-                    result += self.repr( i ) + ','
+                result += self.repr( i ) + ','
 
-            if self.weighted:
-                result += self.repr( i ) + ',' + str( repeat ) + ', ] )'
+            result += ')'
+        elif isinstance( target, list ):
+            result = '['
+
+            for i in target:
+                result += self.repr( i ) + ','
+
+            result += ']'
+        else:
+            result = repr( target )
+
+        return result
+
+    def weighted_repr( self, target ):
+        repeat = 1
+        oldValue = ''
+        result = '['
+
+        #print( 'type: ', end='' )
+        #print( type( target ) )
+
+        for i in target:
+            #print( 'list element type: ', end='' )
+            #print( type( i ) )
+            #print( i )
+
+            if i == oldValue:
+                repeat += 1
             else:
-                result += ') )'
-        except AttributeError:
-            try:
-                isTuple = isinstance( target, tuple )
+                result += self.repr( i ) + ',\n' + str( repeat ) + ','
+                repeat = 1
+                oldValue = i
 
-                if isTuple:
-                    result = '('
-                else:
-                    result = '['
+        result += self.repr( i ) + ',' + str( repeat ) + ']'
 
-                for i in target:
-                    result += self.repr( i ) + ','
-
-                if isTuple:
-                    result += ')'
-                else:
-                    result += ']'
-            except TypeError:
-#                try:
-                    result = wordTypeDescriptions[ target ]
-#                except KeyError:
-#                    result += target
+        #print( 'result: ', end='' )
+        #print( result )
 
         return result
 
@@ -1703,21 +1730,26 @@ wordLists = {
         "Ape",
         "Arachnid",
         "Cat",
+        "Cobra",
         "Dinosaur",
         "Dog",
         "Dragon",
         "Gorilla",
         "Hornet",
         "Insect",
+        "Leopard",
         "Leech",
         "Lion",
         "Lizard",
+        "Python",
+        "Raptor",
         "Serpent",
         "Shark",
         "Snake",
         "Spider",
         "Tarantula",
         "Tiger",
+        "Viper",
         "Wasp",
         "Wolf",
     ) ),
@@ -1726,6 +1758,7 @@ wordLists = {
         "Apes",
         "Arachnids",
         "Cats",
+        "Cobra",
         "Dinosaurs",
         "Dogs",
         "Dragons",
@@ -1735,12 +1768,15 @@ wordLists = {
         "Leechs",
         "Lions",
         "Lizards",
+        "Pythons",
+        "Raptors",
         "Serpents",
         "Sharks",
         "Snakes",
         "Spiders",
         "Tarantulas",
         "Tigers",
+        "Vipers",
         "Wasps",
         "Wolves",
     ) ),
@@ -1977,62 +2013,66 @@ wordLists = {
 #//
 #//**********************************************************************
 
+    nameVillainSingularGeneric : WeightedTuple( (
+        "Alien",
+        "Assassin",
+        "Beast",
+        "Blob",
+        "Brute",
+        "Cannibal",
+        "Commando",
+        "Communist",
+        "Cultist",
+        "Cyborg",
+        "Demon",
+        "Devil",
+        "Djinn",
+        "Dwarf",
+        "Elf",
+        "Force",
+        "Gangster",
+        "Ghost",
+        "Ghoul",
+        "Goblin",
+        "Invader",
+        "Killer",
+        "King",
+        "Knight",
+        "Kraken",
+        "Mechanoid",
+        "Mummy",
+        "Nazi",
+        "Ninja",
+        "Orc",
+        "Parasite",
+        "Pirate",
+        "Prince",
+        "Princess",
+        "Queen",
+        "Rebel",
+        "Revenant",
+        "Robot",
+        "Servant",
+        "Slave",
+        "Spy",
+        "Stranger",
+        "Swamp Creature",
+        "Thief",
+        "Thrall",
+        "Traitor",
+        "Troll",
+        "Vampire",
+        "Viking",
+        "Villain",
+        "Warrior",
+        "Werewolf",
+        "Wizard",
+        "Zombie",
+    ) ),
+
     nameVillainSingularCommon : WeightedTuple( [
-        "Alien",                            1,
-        "Assassin",                         1,
-        "Beast",                            1,
-        "Blob",                             1,
-        "Brute",                            1,
-        "Cannibals",                        1,
-        "Commando",                         1,
-        "Communists",                       1,
-        "Cultist",                          1,
-        "Cyborg",                           1,
-        "Demon",                            1,
-        "Devil",                            1,
-        "Djinn",                            1,
-        "Dwarf",                            1,
-        "Elf",                              1,
-        "Force",                            1,
-        "Gangster",                         1,
-        "Ghost",                            1,
-        "Ghoul",                            1,
-        "Goblin",                           1,
-        "Invader",                          1,
-        "Killer",                           1,
-        "King",                             1,
-        "Knight",                           1,
-        "Kraken",                           1,
-        "Mechanoid",                        1,
-        "Mummy",                            1,
-        "Nazis",                            1,
-        "Ninja",                            1,
-        "Orc",                              1,
-        "Parasite",                         1,
-        "Pirate",                           1,
-        "Prince",                           1,
-        "Princess",                         1,
-        "Queen",                            1,
-        "Rebel",                            1,
-        "Revenant",                         1,
-        "Robot",                            1,
-        "Servant",                          1,
-        "Slave",                            1,
-        "Spy",                              1,
-        "Stranger",                         1,
-        "Swamp Creature",                   1,
-        "Thief",                            1,
-        "Thrall",                           1,
-        "Traitor",                          1,
-        "Troll",                            1,
-        "Vampire",                          1,
-        "Viking",                           1,
-        "Villain",                          1,
-        "Warrior",                          1,
-        "Werewolf",                         1,
-        "Wizard",                           1,
-        "Zombie",                           1,
-        nameAnimalSingular,                 1,
+        nameVillainSingularGeneric,         8,
+        nameAnimalSingular,                 4,
         [ nameAnimalSingular, "Child" ],    1,
         [ nameAnimalSingular, "Creature" ], 1,
         [ nameAnimalSingular, "Man" ],      1,
@@ -2062,6 +2102,7 @@ wordLists = {
         "Doctor",           3,
         "Dr.",              3,
         "Duke",             1,
+        "Emperor",          2,
         "General",          1,
         "King",             1,
         "Lieutenant",       1,
@@ -2073,22 +2114,43 @@ wordLists = {
         "Sergeant",         2,
     ] ),
 
-    nameVillainSingularProperSimple : WeightedTuple( (
-        "Colossus",
-        "Dr. X",
-        "Dr. Z",
-        "Dracula",
-        "Frankenstein",
-        "Fu Manchu",
-        "Harcourt Fenton Mudd",
-        "Hitler",
-        "Jared Syn",
-        "Lizzie Borden",
-        "Nosferatu",
-        "The Cyclops",
-        "The Minotaur",
-        "The Sheriff of Nottingham",
-    ) ),
+    # some of these overlap with nameConceptNegative, but that's because they're really appropriate
+
+    nameVillainGeneric : WeightedTuple( [
+        "Colossus",             1,
+        "Cyclops",              1,
+        "Darkness",             1,
+        "Sauron",               1,
+        "Morgoth",              1,
+        "Death",                1,
+        "Doom",                 1,
+        "Evil",                 1,
+        "Ming",                 1,
+        "Nero",                 1,
+        "Pain",                 1,
+        "Q",                    1,
+        "X",                    1,
+        "Z",                    1,
+        "Zero",                 1,
+        nameConceptNegative,    5,
+    ] ),
+
+    nameVillainSingularProperSimple : WeightedTuple( [
+        "Colossus",                     1,
+        "Dr. X",                        1,
+        "Dr. Z",                        1,
+        "Dracula",                      1,
+        "Frankenstein",                 1,
+        "Fu Manchu",                    1,
+        "Harcourt Fenton Mudd",         1,
+        "Hitler",                       1,
+        "Jared Syn",                    1,
+        "Lizzie Borden",                1,
+        "Nosferatu",                    1,
+        "The Cyclops",                  1,
+        "The Minotaur",                 1,
+        "The Sheriff of Nottingham",    1,
+    ] ),
 
     nameVillainPluralGeographicCommon : WeightedTuple( (
         "Earthlings",
@@ -2096,6 +2158,7 @@ wordLists = {
         "Lunarians",
         "Martians",
         "Mecurians",
+        "Nazis",
         "Neptunians",
         "Plutonians",
         "Saturnians",
@@ -2234,23 +2297,7 @@ wordLists = {
     ] ),
 
     nameVillainSingularProper : WeightedTuple( [
-        nameVillainSingularProperSimple,        5,
-        [
-            nameGroupDescription,
-            nameGroupTypePrepend,
-        ],                                      3,
-        [
-            nameGroupPrepend,
-            nameGroupTypePrepend,
-        ],                                      3,
-        [
-            nameGroupTypeAppend,
-            nameGroupAppend,
-        ],                                      1,
-        [
-            nameGroupTypeAppend,
-            nameGroupDescription,
-        ],                                      3,
+        nameVillainSingularProperSimple,        10,
         [
             'The',
             nameGroupTypeAppend,
@@ -2258,15 +2305,39 @@ wordLists = {
             nameConceptNegative,
         ],                                      1,
         [
-            'The',
-            nameGroupTypeAppend,
-            'of The',
-            nameDirection,
-        ],                                      1,
-        [
             nameConceptNegative,
             nameGroupTypePrepend
         ],                                      1,
+        [
+            nameTitleVillain,
+            nameVillainGeneric,
+        ],                                      6,
+        [
+            nameTitleVillain,
+            nameVillainSingularGeneric,
+        ],                                      3,
+        [
+            nameVillainSingularLeader,
+            nameVillainGeneric,
+        ],                                      3,
+        [
+            'The',
+            nameVillainSingularLeader,
+            'of',
+            nameVillainPluralCommon,
+        ],                                      2,
+        [
+            'The',
+            nameVillainSingularLeader,
+            'of',
+            nameVillainPluralCommon,
+        ],                                      2,
+        [
+            'The',
+            nameVillainSingularLeader,
+            'of',
+            nameVillainPluralGeographicCommon,
+        ],                                      2,
     ] ),
 
     nameVillainPluralProper : WeightedTuple( [
@@ -2512,6 +2583,7 @@ wordLists = {
         "Madness",          1,
         "Oblivion",         2,
         "Oppression",       1,
+        "Pain",             1,
         "Pestilence",       1,
         "Poverty",          1,
         "Prejudice",        1,
@@ -2542,44 +2614,55 @@ wordLists = {
 #//
 #//**********************************************************************
 
-    nameEventSingular : WeightedTuple( [
+    nameEventSingularNeutral : WeightedTuple( [
+        "Case",             1,
+        "Day",              3,
+        "Destiny",          2,
+        "Game",             1,
+        "Journey",          3,
+        "Night",            2,
+        "Trial",            1,
+    ] ),
+
+    nameEventSingularPositive : WeightedTuple( [
+        "Dance",            1,
+        "Feast",            1,
+        "Liberation",       1,
+        "Rise",             1,
+        "Redemption",       1,
+        "Triumph",          2,
+        "Victory",          2,
+    ] ),
+
+    nameEventSingularNegative : WeightedTuple( [
         "Abduction",        1,
         "Assassination",    1,
         "Attack",           2,
         "Battle",           2,
-        "Case",             1,
         "Conquest",         2,
         "Conspiracy",       2,
         "Curse",            2,
-        "Dance",            1,
-        "Day",              3,
         "Debacle",          1,
-        "Destiny",          2,
         "Destruction",      2,
         "Disappearance",    2,
         "Disaster",         2,
         "Downfall",         2,
-        "Feast",            1,
         "Fall",             2,
-        "Game",             1,
         "Invasion",         3,
-        "Journey",          3,
-        "Liberation",       1,
         "Murder",           1,
-        "Night",            2,
         "Peril",            1,
-        "Rise",             1,
-        "Redemption",       1,
-        "Return",           2,
         "Revenge",          2,
         "Storm",            1,
         "Tempest",          1,
         "Tragedy",          1,
-        "Trial",            1,
         "Tribulation",      1,
-        "Triumph",          2,
-        "Victory",          2,
         "War",              2,
+    ] ),
+
+    nameEventSingular : WeightedTuple( [
+        nameEventSingularNeutral,   3,
+        nameEventSingularPositive,  3,
+        nameEventSingularNegative,  1,
     ] ),
 
     nameEventEpoch : WeightedTuple ( [
@@ -2813,6 +2896,14 @@ wordLists = {
         [
             'The',
             WeightedTuple( [
+                [
+                    adjectiveObject,
+                    nameObjectSingularCommon,
+                ],                              3,
+                [
+                    adjectiveObject,
+                    nameWeaponSingular,
+                ],                              2,
                 nameObjectSingularCommon,       5,
                 nameWeaponSingular,             3,
             ] ),
@@ -2825,7 +2916,7 @@ wordLists = {
                 nameVillainSingularProper,      2,
                 nameVillainPluralProper,        2,
             ] )
-        ],                                          2,
+        ],                                          6,
         [
             'The',
             adjectiveObject,
@@ -2837,20 +2928,6 @@ wordLists = {
             adjectiveObjectBase,
             nameObjectSingularCommon
         ],                                          2,
-        [
-            'The',
-            adjectiveObject,
-            ( nameObjectSingularCommon, nameWeaponSingular ),
-            'of',
-            WeightedTuple( [
-                namePlaceProper,                3,
-                [ 'The', nameDirection ],       1,
-                nameHeroSingularProper,         3,
-                nameHeroPluralProper,           3 ,
-                nameVillainSingularProper,      2,
-                nameVillainPluralProper,        2 ,
-            ] ),
-        ],                                                  2,
         [
             nameHeroSingularProperSimplePossessive,
             ( nameObjectSingularCommon, nameWeaponSingular ),
@@ -3092,7 +3169,12 @@ titleTypes = WeightedTuple( [
     [
         'To',
         verbPhrasePresentPluralCharacter,
-        ( nameHeroSingularProper, nameHeroPluralProper, nameVillainSingularProper, nameVillainPluralProper, ),
+        (
+            nameHeroSingularProper,
+            nameHeroPluralProper,
+            nameVillainSingularProper,
+            nameVillainPluralProper,
+        ),
     ], 1,
     [
         'To',
@@ -3128,7 +3210,11 @@ titleTypes = WeightedTuple( [
                 namePossessionVillainPlural ],      1,
         ] ),
         'of',
-        WeightedTuple( [ nameVillainSingularProper, 2, nameVillainPluralProper, 2, namePlaceProper, 1 ] ),
+        WeightedTuple( [
+            nameVillainSingularProper, 4,
+            nameVillainPluralProper, 1,
+            namePlaceProper, 1
+        ] ),
     ], 2,
     [
         WeightedTuple( (
@@ -3150,17 +3236,33 @@ titleTypes = WeightedTuple( [
         WeightedTuple ( (
             [ 'The', nameEventSingular ],
             [ 'The', nameEventPlural ],
-            [ 'The', WeightedTuple( [ adjectiveObject, 2, adjectiveObject, 1, adjectiveNumber, 1 ] ), nameEventPlural ],
+            [
+                'The',
+                WeightedTuple( [
+                    adjectiveObject,    2,
+                    adjectiveObject,    1,
+                    adjectiveNumber,    1,
+                ] ),
+                nameEventPlural
+            ],
             [ 'The', adjectiveObject, nameEventSingular ],
-            [ 'The', WeightedTuple( [ adjectiveObject, 2, adjectiveVillain, 1, adjectiveNumber, 1 ] ), namePossessionVillainPlural ],
+            [
+                'The',
+                WeightedTuple( [
+                    adjectiveObject,    2,
+                    adjectiveVillain,   1,
+                    adjectiveNumber,    1,
+                ] ),
+                namePossessionVillainPlural
+            ],
         ) ),
         'of',
-        WeightedTuple( (
-            nameVillainSingularProper,
-            nameVillainPluralProper,
-            [ 'The', nameVillainSingularCommon ],
-            [ 'The', nameVillainPluralCommon ],
-        ) ),
+        WeightedTuple( [
+            nameVillainSingularProper,              2,
+            nameVillainPluralProper,                1,
+            [ 'The', nameVillainSingularCommon ],   1,
+            [ 'The', nameVillainPluralCommon ],     1,
+        ] ),
     ], 5,
     [
         WeightedTuple( [
@@ -3353,7 +3455,10 @@ titleTypes = WeightedTuple( [
     [
         nameHeroSingularProper,
         ( verbPhrasePresentSingularCharacter ),
-        ( nameVillainSingularProper, nameVillainPluralProper ),
+        WeightedTuple( [
+            nameVillainSingularProper,  3,
+            nameVillainPluralProper,    1,
+        ] ),
     ], 3,
     [
         ( nameHeroSingularProper, nameHeroPluralProper ),
@@ -3368,7 +3473,12 @@ titleTypes = WeightedTuple( [
     ], 1,
     [
         verbPhraseGerundCharacter,
-        ( nameHeroSingularProper, nameHeroPluralProper, nameVillainSingularProper, nameVillainPluralProper ),
+        (
+            nameHeroSingularProper,
+            nameHeroPluralProper,
+            nameVillainSingularProper,
+            nameVillainPluralProper
+        ),
     ], 1,
     [
         verbPhraseGerundCharacter,
@@ -3376,14 +3486,21 @@ titleTypes = WeightedTuple( [
     ], 1,
     [
         'Have',
-        WeightedTuple( [ nameObjectSingularCommon, 1, nameWeaponSingular, 2, nameVehicleSingular, 2 ] ),
+        WeightedTuple( [
+            nameObjectSingularCommon,   1,
+            nameWeaponSingular,         2,
+            nameVehicleSingular,        2,
+        ] ),
         ', Will Travel',
     ], 1,
     [
         verbPhraseGerundPlace,
         ( nameConceptPositive, nameConceptNeutral ),
         'With',
-        WeightedTuple( [ nameHeroSingularProper, 2, nameHeroPluralProper, 1 ] ),
+        WeightedTuple( [
+            nameHeroSingularProper, 2,
+            nameHeroPluralProper,   1,
+        ] ),
     ], 1,
     [
         verbPhraseGerundPlace,
@@ -3396,7 +3513,10 @@ titleTypes = WeightedTuple( [
         namePlaceProper,
     ], 1,
     [
-        WeightedTuple( [ nameHeroSingularProper, 3, nameHeroPluralProper, 1 ] ),
+        WeightedTuple( [
+            nameHeroSingularProper, 3,
+            nameHeroPluralProper,   1,
+        ] ),
         prepositionalPhraseSingularProper,
         namePlaceProper,
     ], 1,
@@ -3407,7 +3527,12 @@ titleTypes = WeightedTuple( [
         namePlaceProperSimple,
     ], 2,
     [
-        ( [ 'The', nameEventSingular ], [ 'The', nameEventPlural ], [ 'The', adjectivePlace, nameEventSingular ], [ 'The', adjectivePlace, nameEventPlural ] ),
+        (
+            [ 'The', nameEventSingular ],
+            [ 'The', nameEventPlural ],
+            [ 'The', adjectivePlace, nameEventSingular ],
+            [ 'The', adjectivePlace, nameEventPlural ]
+        ),
         'of',
         namePlaceProper,
     ], 3,
@@ -3415,13 +3540,22 @@ titleTypes = WeightedTuple( [
         nameHeroSingularProper,
         prepositionalPhraseSingularCommon,
         'The',
-        WeightedTuple( [ adjectivePlace, 3, [ adverbAdjective, adjectivePlace ], 1 ] ),
+        WeightedTuple(
+            [ adjectivePlace,                       3,
+            [ adverbAdjective, adjectivePlace ],    1,
+        ] ),
         namePlaceCommon,
     ], 1,
     [
         nameHeroSingularCommon,
         ( 'With A', 'Without A' ),
-        WeightedTuple( [ nameObjectSingularCommon, 3, [ adjectiveObject, nameObjectSingularCommon ], 1 ] ),
+        WeightedTuple( [
+            nameObjectSingularCommon,       3,
+            [
+                adjectiveObject,
+                nameObjectSingularCommon,
+            ],                              1,
+        ] ),
     ], 1,
     [
         nameHeroPluralCommon,
@@ -3429,7 +3563,7 @@ titleTypes = WeightedTuple( [
         WeightedTuple( [
             nameObjectPluralCommon,                         3,
             [ adjectiveObject, nameObjectPluralCommon ],    1,
-            nameConceptPositive,                                1,
+            nameConceptPositive,                            1,
             nameConceptNeutral,                             1,
         ] ),
     ], 1,
@@ -3663,6 +3797,10 @@ titleTypes = WeightedTuple( [
             [ adjectiveObject, nameObjectPluralCommon ],    1,
         ] ),
     ], 1,
+    [
+        nameVillainSingularProper,
+    ], 8,
+
 ] )
 
 
@@ -3701,55 +3839,12 @@ def getWord( wordType ):
 #//**********************************************************************
 
 def getTitle( ):
-    titleType = random.choice( titleTypes )
-    print( titleType )
-
-    result = getWord( random.choice( titleTypes ) )
+    result = getWord( titleTypes.choice( ) )
 
     for i in range( 0, len( replaceList ) - 1, 2 ):
         result = result.replace( replaceList[ i ], replaceList[ i + 1 ] )
 
     return result
-
-
-#//**********************************************************************
-#//
-#//  main
-#//
-#//**********************************************************************
-
-def main( ):
-
-    print( wordTypeDescriptions[ adjectiveActionHero ] )
-
-    parser = argparse.ArgumentParser( prog='BMovie' )
-
-    parser.add_argument( '-n', '--count', type=int, action='store', default=1 )
-    parser.add_argument( '-s', '--stats', action='store_true' )
-
-    args = parser.parse_args( )
-
-    count = args.count
-
-    for i in range( 0, count ):
-        print( getTitle( ) )
-
-    if args.stats:
-        for i in wordTypeDescriptions.keys( ):
-            print( )
-            print(  wordTypeDescriptions[ i ] + ":" );
-            print( )
-            print( wordLists[ i ] )
-
-
-#//**********************************************************************
-#//
-#//  __main__
-#//
-#//**********************************************************************
-
-if __name__ == '__main__':
-    main( )
 
 
 #//**********************************************************************
@@ -3801,9 +3896,9 @@ def siteBody( title ):
     result += "<h2>" + getTitle( ) + "</h2>"
     result += "Hit 'Refresh' for more names.  Props to Richard Hatch!<br>"
     result += "Thanks for many additional suggestions from Ian, Francine and Jeremy.<br>"
-    result += "If you see a real movie name, it's luck... nothing is hard-coded.<br><br>"
-    result += 'Your B-Movie needs a hero!  Why not give him a <a href="http://conceptjunkie.gotdns.com/BigMcLargeHuge.py">name</a>?<br>'
-    result += 'Send suggestions, complaints or meandering stories about your goiter to <a href="mailto:rickg@his.com?subject=BigMcLargeHuge">rickg@his.com</a><br><br><br>'
+    result += "This is still version 0.  I'm not really happy with how it works yet.<br><br>"
+    result += 'Your B-Movie needs a hero!  Why not give him a <a href="http://zycha.com/BigMcLargeHuge.py">name</a>?<br>'
+    result += 'Send suggestions, complaints or rambling stories about your cat\'s health problems to <a href="mailto:rickg@his.com?subject=BigMcLargeHuge">rickg@his.com</a><br><br><br>'
 
     return result
 
@@ -3817,4 +3912,23 @@ def siteBody( title ):
 def siteFooter( ):
     str = "\n</body></html>"
     return str
+
+
+#//**********************************************************************
+#//
+#//  buildWebPage
+#//
+#//**********************************************************************
+
+def buildWebPage( ):
+    pageTitle = "BMovie 0.4.3, random B-Movie title generator, by Rick Gutleber, 2012"
+
+    webPage = "Content-Type: text/html\r\n\r\n"
+    webPage += siteHeader( pageTitle )
+    webPage += siteBody( pageTitle )
+    webPage += siteFooter( )
+    return webPage
+
+
+print buildWebPage( )
 
