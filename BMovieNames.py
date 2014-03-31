@@ -5,6 +5,34 @@ from WeightedTuple import WeightedTuple
 from BMoviePossessions import *
 
 
+#//**********************************************************************
+#//
+#//  makePossessive
+#//
+#//**********************************************************************
+
+def makePossessive( wordType ):
+    result = getWord( wordType )
+
+    if result[ -1 ] == 's':
+        return result + "'"
+    else:
+        return result + "'s"
+
+
+def makeNameHeroSingularProperSimplePossessive( ):
+    return makePossessive( getWord( nameHeroSingularProperSimple ) )
+
+def makeNameHeroPluralProperSimplePossessive( ):
+    return makePossessive( getWord( nameHeroPluralProperSimple ) )
+
+def makeNameVillainSingularProperSimplePossessive( ):
+    return makePossessive( getWord( nameVillainSingularProperSimple ) )
+
+def makeNameVillainPluralProperSimplePossessive( ):
+    return makePossessive( getWord( nameVillainPluralProperSimple ) )
+
+
 nameWordLists = {
 
 #//**********************************************************************
