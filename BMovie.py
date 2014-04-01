@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import argparse
 import string
 
 from BMovieConstants import *
 from WeightedTuple import WeightedTuple
 from BMovieTitles import getTitle
+
 
 #//**********************************************************************
 #//
@@ -14,7 +17,7 @@ from BMovieTitles import getTitle
 #//**********************************************************************
 
 PROGRAM_NAME = "BMovie"
-VERSION = "0.4.4"
+VERSION = "0.5.0"
 PROGRAM_DESCRIPTION = "B-Movie title generator"
 COPYRIGHT_MESSAGE = "copyright (c) 2013, Rick Gutleber"
 
