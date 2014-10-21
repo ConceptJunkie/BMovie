@@ -30,9 +30,14 @@ class WeightedTuple( object ):
             for i in range( 0, len( values ) - 1, 2 ):
                 self.values.extend( [ values[ i ] ] * values[ i + 1 ] )
 
-            if len( values ) > 4:
-                self.maxHistory = int( len( values ) / 4 ) + 1
-            elif len( values ) == 4:
+            try:
+                uniqueItems = len( set( values ) )
+            except:
+                uniqueItems = len( values )
+
+            if uniqueItems > 4:
+                self.maxHistory = uniqueItems // 4 + 1
+            elif uniqueItems == 4:
                 self.maxHistory = 1
             else:
                 self.maxHistory = 0
@@ -40,9 +45,14 @@ class WeightedTuple( object ):
             self.weighted = False
             self.values = list( values )
 
-            if len( self.values ) > 2:
-                self.maxHistory = int( len( self.values ) / 2 ) + 1
-            elif len( self.values ) == 2:
+            try:
+                uniqueItems = len( set( values ) )
+            except:
+                uniqueItems = len( values )
+
+            if uniqueItems > 4:
+                self.maxHistory = uniqueItems // 4 + 1
+            elif uniqueItems == 4:
                 self.maxHistory = 1
             else:
                 self.maxHistory = 0
