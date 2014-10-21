@@ -1,23 +1,18 @@
 #!/usr/bin/env python
 
+import random
+
 from BMovieConstants import *
+
+from BMovieAdjectives import adjectiveWordLists
+from BMovieAdverbs import adverbWordLists
+from BMovieConcepts import conceptWordLists
+from BMovieEvents import eventWordLists
+from BMovieObjects import objectWordLists
+from BMoviePlaces import placeWordLists
+from BMoviePossessions import possessionWordLists
+from BMovieVerbPhrases import verbPhraseWordLists
 from WeightedTuple import WeightedTuple
-from BMoviePossessions import *
-
-
-#//**********************************************************************
-#//
-#//  makePossessive
-#//
-#//**********************************************************************
-
-def makePossessive( wordType ):
-    result = getWord( wordType )
-
-    if result[ -1 ] == 's':
-        return result + "'"
-    else:
-        return result + "'s"
 
 
 def makeNameHeroSingularProperSimplePossessive( ):
@@ -376,6 +371,7 @@ nameWordLists = {
 
     nameHeroSingularProperSimplePossessive : makeNameHeroSingularProperSimplePossessive,
     nameHeroPluralProperSimplePossessive : makeNameHeroPluralProperSimplePossessive,
+
 
 
 #//**********************************************************************
@@ -894,5 +890,69 @@ nameWordLists = {
         nameConceptNegative,
     ) ),
 }
+
+
+
+#//**********************************************************************
+#//
+#//  wordLists
+#//
+#//**********************************************************************
+
+wordLists = { }
+
+wordLists.update( adjectiveWordLists )
+wordLists.update( adverbWordLists )
+wordLists.update( verbPhraseWordLists )
+wordLists.update( placeWordLists )
+wordLists.update( nameWordLists )
+wordLists.update( conceptWordLists )
+wordLists.update( eventWordLists )
+wordLists.update( objectWordLists )
+wordLists.update( possessionWordLists )
+
+
+#//**********************************************************************
+#//
+#//  getWord
+#//
+#//**********************************************************************
+
+def getWord( wordType ):
+    if type( wordType ) is int:
+        return getWord( wordLists[ wordType ] )
+    elif type( wordType ) is tuple:
+        return getWord( random.choice( wordType ) )
+    elif type( wordType ) is WeightedTuple:
+        return getWord( wordType.choice( ) )
+    elif type( wordType ) is str:
+        return wordType
+    elif type( wordType ) is list:
+        result = ''
+
+        for word in wordType:
+            if result != '':
+                result += ' '
+            result += getWord( word )
+
+        return result
+    elif hasattr( wordType, '__call__' ):
+        return wordType( )
+
+
+#//**********************************************************************
+#//
+#//  makePossessive
+#//
+#//**********************************************************************
+
+def makePossessive( wordType ):
+    result = getWord( wordType )
+
+    if result[ -1 ] == 's':
+        return result + "'"
+    else:
+        return result + "'s"
+
 
 

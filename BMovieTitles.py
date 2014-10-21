@@ -1,65 +1,8 @@
 #!/usr/bin/env python
 
-import random
-
-from BMovieAdjectives import adjectiveWordLists
-from BMovieAdverbs import adverbWordLists
-from BMovieConcepts import conceptWordLists
 from BMovieConstants import *
-from BMovieEvents import eventWordLists
-from BMovieNames import nameWordLists
-from BMovieObjects import objectWordLists
-from BMoviePlaces import placeWordLists
-from BMoviePossessions import possessionWordLists
-from BMovieVerbPhrases import verbPhraseWordLists
+from BMovieNames import getWord
 from WeightedTuple import WeightedTuple
-
-
-#//**********************************************************************
-#//
-#//  wordLists
-#//
-#//**********************************************************************
-
-wordLists = { }
-
-wordLists.update( adjectiveWordLists )
-wordLists.update( adverbWordLists )
-wordLists.update( verbPhraseWordLists )
-wordLists.update( placeWordLists )
-wordLists.update( nameWordLists )
-wordLists.update( conceptWordLists )
-wordLists.update( eventWordLists )
-wordLists.update( objectWordLists )
-wordLists.update( possessionWordLists )
-
-
-#//**********************************************************************
-#//
-#//  getWord
-#//
-#//**********************************************************************
-
-def getWord( wordType ):
-    if type( wordType ) is int:
-        return getWord( wordLists[ wordType ] )
-    elif type( wordType ) is tuple:
-        return getWord( random.choice( wordType ) )
-    elif type( wordType ) is WeightedTuple:
-        return getWord( wordType.choice( ) )
-    elif type( wordType ) is str:
-        return wordType
-    elif type( wordType ) is list:
-        result = ''
-
-        for word in wordType:
-            if result != '':
-                result += ' '
-            result += getWord( word )
-
-        return result
-    elif hasattr( wordType, '__call__' ):
-        return wordType( )
 
 
 #//**********************************************************************
