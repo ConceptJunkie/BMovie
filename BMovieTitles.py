@@ -36,7 +36,7 @@ titleTypes = WeightedTuple( [
         ] ),
     ], 1,
     [
-        'Destination',
+        'Destination:',
         WeightedTuple( [
             namePlaceProper,        6,
             nameConceptPositive,    1,

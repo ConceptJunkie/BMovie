@@ -7,7 +7,7 @@ import string
 
 from BMovieConstants import *
 from WeightedTuple import WeightedTuple
-from BMovieTitles import getTitle
+from BMovieTitles import getTitle, titleTypes
 
 
 #//**********************************************************************
